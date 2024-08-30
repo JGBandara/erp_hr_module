@@ -3,70 +3,68 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\Department; 
 use Illuminate\Http\Request;
+use App\Traits\ApiResponse;
+
 
 class DepartmentController extends Controller
+
 {
-    public function index()
-    {
-        $departments = Department::all();
-        return response()->json($departments);
-    }
-
-    public function store(Request $request)
-    {
-        $request->validate([
-            'code' => 'required|string|max:10',
-            'name' => 'required|string|max:255',
-            'remark' => 'nullable|string',
-            'status' => 'required|boolean',
-        ]);
-
-        $department = Department::create($request->all());
-
-        return response()->json([
-            'status' => 200,
-            'message' => 'Department added successfully!',
-            'department' => $department,
-        ]);
-    }
-
-    public function get($id)
-    {
-        $department = Department::find($id); // Use the Department model
-        if ($department) {
-            return response(['status' => 'success', 'department' => $department, 'code' => 200]);
-        } else {
-            return response(['status' => 'error', 'message' => 'Department not found', 'code' => 404]);
+    use ApiResponse;
+   
+        public function index()
+        {
+            $departments = Department::all();
+            return response()->json($departments);
         }
-    }
-
-    public function update(Request $request, $id)
-    {
-        $request->validate([
-            'code' => 'required|string|max:10',
-            'name' => 'required|string|max:255',
-            'remark' => 'nullable|string',
-            'status' => 'required|boolean',
-        ]);
-
-        $department = Department::find($id); // Use the Department model
-        if ($department) {
-            $department->update($request->all());
-            return response(['status' => 'success', 'department' => $department, 'code' => 200]);
-        } else {
-            return response(['status' => 'error', 'message' => 'Department not found', 'code' => 404]);
+    
+        // Load data (Get a specific department by ID)
+        public function show($id)
+        {
+            $department = Department::find($id);
+            if (!$department) {
+                return response()->json(['message' => 'Department not found'], 404);
+            }
+            return response()->json($department);
         }
-    }
-
-    public function delete($id)
-    {
-        $department = Department::find($id); // Use the Department model
-        if ($department) {
+    
+        // Add a new department
+        public function store(Request $request)
+        {
+            $department = new Department();
+            $department->name = $request->name;
+            $department->save();
+            return $this->successResponse($department, 'Data Saved Successfully', 200);
+        }
+    
+        // Edit an existing department
+        public function update(Request $request, $id)
+        {
+            $department = Department::find($id);
+            if (!$department) {
+                return response()->json(['message' => 'Department not found'], 404);
+            }
+            $department->dep_code = $request->dep_code;
+            $department->dep_name = $request->dep_name;
+            $department->dep_remark = $request->dep_remark;
+            $department->dep_status= $request->dep_status;
+            $department->save();
+    
+            return response()->json(['message' => 'Department updated successfully', 'data' => $department]);
+        }
+    
+        // Delete a department
+        public function destroy($id)
+        {
+            $department = Department::find($id);
+            if (!$department) {
+                return response()->json(['message' => 'Department not found'], 404);
+            }
+    
             $department->delete();
-            return response(['status' => 'success', 'message' => 'Department deleted successfully', 'code' => 200]);
-        } else {
-            return response(['status' => 'error', 'message' => 'Department not found', 'code' => 404]);
+    
+            return response()->json(['message' => 'Department deleted successfully']);
         }
     }
-}
+    
