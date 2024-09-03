@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Department; 
 use Illuminate\Http\Request;
 use App\Traits\ApiResponse;
-
+use Illuminate\Support\Facades\Gate;
 
 class DepartmentController extends Controller
 
@@ -28,38 +28,56 @@ class DepartmentController extends Controller
             }
             return response()->json($department);
         }
-    
+        public function isValidUser(int $id): JsonResponse{
+            return response()->json($this->userService->checkUserById($id));
+        }
         // Add a new department
         public function store(Request $request)
         {
+            if (Gate::denies('add-department')) {
+                return response()->json(['message' => 'You do not have permission to add a department'], 403);
+            }
+    
             $department = new Department();
-            $department->name = $request->name;
+            $department->dep_code = $request->dep_code;
+            $department->dep_name = $request->dep_name;
+            $department->dep_remark = $request->dep_remark;
+            $department->dep_status= $request->dep_status;
             $department->save();
             return $this->successResponse($department, 'Data Saved Successfully', 200);
+            
         }
     
         // Edit an existing department
         public function update(Request $request, $id)
         {
+            if (Gate::denies('edit-department')) {
+                return response()->json(['message' => 'You do not have permission to edit this department'], 403);
+            }
             $department = Department::find($id);
             if (!$department) {
-                return response()->json(['message' => 'Department not found'], 404);
+                return $this->errorResponse('Department not found', 404);
             }
+            
             $department->dep_code = $request->dep_code;
             $department->dep_name = $request->dep_name;
             $department->dep_remark = $request->dep_remark;
             $department->dep_status= $request->dep_status;
             $department->save();
     
-            return response()->json(['message' => 'Department updated successfully', 'data' => $department]);
+            return $this->successResponse($department,'Department updated successfully', 200);
         }
     
         // Delete a department
         public function destroy($id)
         {
+            if (Gate::denies('delete-department')) {
+                return response()->json(['message' => 'You do not have permission to delete this department'], 403);
+            }
+
             $department = Department::find($id);
             if (!$department) {
-                return response()->json(['message' => 'Department not found'], 404);
+                return $this->errorResponse('Department not found', 404);
             }
     
             $department->delete();
