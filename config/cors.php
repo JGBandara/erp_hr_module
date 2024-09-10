@@ -15,20 +15,15 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+   
+        'paths' => ['api/*'], // Add the necessary paths
+        'allowed_methods' => ['*'], // or specify the methods like ['GET', 'POST']
+        'allowed_origins' => ['http://localhost:3000'], // Specify your frontend's domain
+        'allowed_origins_patterns' => [],
+        'allowed_headers' => ['*'], // or specify headers like ['Content-Type', 'X-Requested-With']
+        'exposed_headers' => ['Authorization'],
+        'max_age' => 0,
+        'supports_credentials' => true, // This is important to allow credentials
 
-    'allowed_methods' => ['*'],
-
-    'allowed_origins' => ['*'],
-
-    'allowed_origins_patterns' => [],
-
-    'allowed_headers' => ['*'],
-
-    'exposed_headers' => [],
-
-    'max_age' => 0,
-
-    'supports_credentials' => false,
-
+    
 ];

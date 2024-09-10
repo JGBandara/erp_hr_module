@@ -7,6 +7,8 @@ use App\Models\Department;
 use Illuminate\Http\Request;
 use App\Traits\ApiResponse;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Http;
+
 
 class DepartmentController extends Controller
 
@@ -34,17 +36,24 @@ class DepartmentController extends Controller
         // Add a new department
         public function store(Request $request)
         {
-            if (Gate::denies('add-department')) {
-                return response()->json(['message' => 'You do not have permission to add a department'], 403);
-            }
+            $user  = Http::withHeaders([
+                'Authorization' => $request->header('Authorization')
+            ])->get('http://localhost:8001/api/user');
     
-            $department = new Department();
-            $department->dep_code = $request->dep_code;
-            $department->dep_name = $request->dep_name;
-            $department->dep_remark = $request->dep_remark;
-            $department->dep_status= $request->dep_status;
-            $department->save();
-            return $this->successResponse($department, 'Data Saved Successfully', 200);
+            // if (!$user) {
+                return $user;
+            // }
+            // if (Gate::denies('add-department')) {
+            //     return response()->json(['message' => 'You do not have permission to add a department'], 403);
+            // }
+    
+            // $department = new Department();
+            // $department->dep_code = $request->dep_code;
+            // $department->dep_name = $request->dep_name;
+            // $department->dep_remark = $request->dep_remark;
+            // $department->dep_status= $request->dep_status;
+            // $department->save();
+            // return $this->successResponse($department, 'Data Saved Successfully', 200);
             
         }
     

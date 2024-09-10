@@ -18,7 +18,7 @@ class EbExamTypeDesignation extends Model
     protected $fillable= [ 'extd_exam_type_id','extd_designation_id', 'extd_remark', 'extd_status'];
     
 }
-class EbExamTypeDesignation extends Model
+class EbExamTypeSubject extends Model
 {
     protected $table = 'hr_mst_eb_type_subject';
     protected $fillable= [ 'exts_exam_type_id', 'exts_subject','exts_remark', 'exts_status'];

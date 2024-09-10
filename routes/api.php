@@ -12,8 +12,6 @@ use App\Http\Controllers\API\EbExamTypeController;
 use App\Http\Controllers\API\EbExamController;
 use App\Http\Controllers\API\TrainingProgrammeController;
 use App\Http\Controllers\API\ResignTypeController;
-
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -28,6 +26,8 @@ use App\Http\Controllers\API\ResignTypeController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+
 
 Route::group(['middleware' => ['auth:api']], function () {
     Route::post('departments', [DepartmentController::class, 'store'])->middleware('check.permission:add-department');

@@ -39,4 +39,5 @@ trait ApiResponse
             'errors' => $errors,
         ], $status);
     }
+    
 }
