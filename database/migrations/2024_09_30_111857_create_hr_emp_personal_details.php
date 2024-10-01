@@ -30,6 +30,8 @@ return new class extends Migration
             $table->string('current_address');
             $table->string('residence_phone_number');
             $table->string('emerg_phone_and_cont_num')->nullable();
+            $table->integer('is_deleted')->default(0);
+            $table->integer('modified_by')->nullable();
             $table->timestamps();
         });
     }

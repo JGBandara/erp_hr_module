@@ -94,3 +94,5 @@ Route::delete('/resignType/{id}', [ResignTypeController::class, 'destroy']);
 
 Route::post('/personalDetails/add',[PersonalDetailsController::class,'store']);
 Route::get('/personalDetails/allForUsers',[PersonalDetailsController::class,'getAllForUsers']);
+Route::get('/personalDetails/{id}',[PersonalDetailsController::class,'getAllDetails']);
+Route::put('/personalDetails/{id}',[PersonalDetailsController::class,'update']);
