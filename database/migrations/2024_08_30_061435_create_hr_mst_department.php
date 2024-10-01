@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('dep_name');
             $table->string('dep_remark');
             $table->integer('dep_status');
+            $table->integer('dep_is_deleted')->default(0);
             $table->timestamps();
         });
     }
