@@ -9,6 +9,7 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
+
     public function up(): void
     {
         Schema::create('hr_mst_division', function (Blueprint $table) {
@@ -17,11 +18,14 @@ return new class extends Migration
             $table->string('div_name');
             $table->integer('div_dep_id');
             $table->integer('div_head');
-            $table->string('div_remark');
+            $table->string('div_remark')->nullable();
             $table->integer('div_status');
+            $table->integer('div_is_deleted')->default(0);
+            $table->integer('div_modified_by')->nullable();
             $table->timestamps();
         });
     }
+    
 
     /**
      * Reverse the migrations.

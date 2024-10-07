@@ -4,7 +4,7 @@ namespace App\Http\Controllers\API;
 
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use App\Models\Department;
+use App\Models\Department; 
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Traits\ApiResponse;
@@ -14,10 +14,12 @@ class DepartmentController extends Controller
 {
     use ApiResponse;
 
-
+    
     public function index()
     {
-        $departments = Department::all();
+        // $departments = Department::all();
+        // return response()->json($departments);
+        $departments = Department::where('dep_is_deleted', 0)->get();
         return response()->json($departments);
     }
 
@@ -30,11 +32,9 @@ class DepartmentController extends Controller
         return response()->json($department);
     }
 
-
+    
     public function store(Request $request)
     {
-
-
         $validatedData = $request->validate([
             'department_code' => 'required|string|unique:hr_mst_department,dep_code',
             'department_name' => 'required|string|max:255',
@@ -61,7 +61,7 @@ class DepartmentController extends Controller
             'dep_name' => $validatedData['department_name'],
             'dep_remark' => $validatedData['remark'] ?? null,
             'dep_status' => $validatedData['active'],
-
+          
         ];
 
         try {
@@ -74,9 +74,9 @@ class DepartmentController extends Controller
             return response()->json(['message' => 'Server Error'], 500);
         }
     }
-    public function update(Request $request, $id)
+            public function update(Request $request, $id)
     {
-
+        
         $department = Department::find($id);
         if (!$department) {
             return $this->errorResponse('Department not found', 404);
@@ -94,7 +94,7 @@ class DepartmentController extends Controller
         $department->dep_name = $validatedData['department_name'];
         $department->dep_remark = $validatedData['remark'] ?? null;
         $department->dep_status = $validatedData['active'] ? 1 : 0; // Convert boolean to integer (1 or 0)
-
+        
         // Save the updated department
         try {
             $department->save();
@@ -105,17 +105,18 @@ class DepartmentController extends Controller
         }
     }
 
-    // Delete a department
-    public function destroy($id)
-    {
-
-        $department = Department::find($id);
-        if (!$department) {
-            return $this->errorResponse('Department not found', 404);
+        // Delete a department
+        public function destroy($id)
+        {
+        
+            $department = Department::find($id);
+            if (!$department) {
+                return $this->errorResponse('Department not found', 404);
+            }
+            $department->dep_is_deleted = 1;
+            $department->save();
+    
+            return response()->json(['message' => 'Department deleted successfully']);
         }
-        $department->dep_is_deleted = 1;
-        $department->save();
-
-        return response()->json(['message' => 'Department deleted successfully']);
     }
-}
+    
