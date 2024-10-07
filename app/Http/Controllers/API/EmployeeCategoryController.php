@@ -10,7 +10,11 @@ use App\Traits\ApiResponse;
 class EmployeeCategoryController extends Controller
 {
     use ApiResponse;
-   
+    private EmployeeCategoryService $employeeCategoryService; 
+
+    public function __construct(EmployeeCategoryService $employeeCategoryService){
+        $this->EmployeeCategoryService=$employeeCategoryService;
+    }
     public function index()
     {
         $category = EmployeeCategory::all();
@@ -40,7 +44,15 @@ class EmployeeCategoryController extends Controller
         $category->save();
         return $this->successResponse($category, 'Data Saved Successfully', 200);
     }
-
+    // public function store(StoreEmployeeCategoryRequest $request){
+    //     $validatedData = $request->validated();
+    //     try {
+    //         $data = $this->employeeCategoryService->store($validatedData);
+    //         return $this->successResponse($data,'Data saved successful',200);
+    //     }catch (\Exception $e){
+    //         return $this->errorResponse([],[$e->getMessage()]);
+    //     }
+    // }
     // Edit an existing department
     public function update(Request $request, $id)
     {

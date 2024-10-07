@@ -31,24 +31,24 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 
 
-//Route::group(['middleware' => ['auth:api']], function () {
-    Route::post('departments', [DepartmentController::class, 'store']);
-    Route::put('departments/{id}', [DepartmentController::class, 'update']);
-    Route::delete('departments/{id}', [DepartmentController::class, 'destroy']);
-//});
-
+Route::post('departments', [DepartmentController::class, 'store']);
+Route::put('departments/{id}', [DepartmentController::class, 'update']);
+Route::delete('departments/{id}', [DepartmentController::class, 'destroy']);
 Route::get('/departments/all', [DepartmentController::class, 'index']);
 Route::get('/departments/{id}', [DepartmentController::class, 'show']);
+
 Route::get('/category', [EmployeeCategoryController::class, 'index']);
 Route::get('/category/{id}', [EmployeeCategoryController::class, 'show']);
 Route::post('/category', [EmployeeCategoryController::class, 'store']);
 Route::put('/category/{id}', [EmployeeCategoryController::class, 'update']);
 Route::delete('/category/{id}', [EmployeeCategoryController::class, 'destroy']);
-Route::get('/division', [DivisionController::class, 'index']);
-Route::get('/division/{id}', [DivisionController::class, 'show']);
+
+Route::get('/division/getAll', [DivisionController::class, 'index']);
+Route::get('/division/{id}', [DivisionController::class, 'getAllDetails']);
 Route::post('/division', [DivisionController::class, 'store']);
 Route::put('/division/{id}', [DivisionController::class, 'update']);
 Route::delete('/division/{id}', [DivisionController::class, 'destroy']);
+
 Route::get('/designation', [DesignationController::class, 'index']);
 Route::get('/designation/{id}', [DesignationController::class, 'show']);
 Route::post('/designation', [DesignationController::class, 'store']);
