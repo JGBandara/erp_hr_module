@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\API\DistrictsController;
 use App\Http\Controllers\API\PersonalDetailsController;
+use App\Http\Controllers\EmployeeTrainingHistoryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\DepartmentController;
@@ -96,3 +97,5 @@ Route::post('/personalDetails/add',[PersonalDetailsController::class,'store']);
 Route::get('/personalDetails/allForUsers',[PersonalDetailsController::class,'getAllForUsers']);
 Route::get('/personalDetails/{id}',[PersonalDetailsController::class,'getAllDetails']);
 Route::put('/personalDetails/{id}',[PersonalDetailsController::class,'update']);
+
+Route::get('/employeeTrainingHistory/add',[EmployeeTrainingHistoryController::class,'store']);
