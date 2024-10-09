@@ -45,13 +45,12 @@ class DivisionController extends Controller
             }
             public function update(StoreDivisionRequest $request, $id) {
                 try {
-                    // Log the incoming request data
+                    
                     Log::info('Update Request Data: ', $request->all());
             
                     $userId = $this->checkPermission($request, 94);
                     $validatedData = $request->validated();
                     
-                    // Check the structure of validatedData
                     Log::info('Validated Data: ', $validatedData);
                     
                     $this->divisionService->update($validatedData, $id, $userId);
