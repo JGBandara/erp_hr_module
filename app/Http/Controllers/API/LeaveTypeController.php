@@ -2,76 +2,93 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Exceptions\UnauthorizedException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreLeaveTypeRequest;
 use App\Models\LeaveType; 
 use Illuminate\Http\Request;
+use App\Services\LeaveTypeService;
 use App\Traits\ApiResponse;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class LeaveTypeController extends Controller
 {
     use ApiResponse;
-   
+    private LeaveTypeService $leaveTypeService;
+
+    public function __construct(LeaveTypeService $leaveTypeService){
+        $this->leaveTypeService = $leaveTypeService;
+    }
+
     public function index()
     {
-        $leaveType = LeaveType::all();
-        return response()->json($leaveType);
+        return $this->leaveTypeService->getAll();
     }
 
-    // Load data (Get a specific leaveType by ID)
-    public function show($id)
-    {
-        $leaveType = LeaveType::find($id);
-        if (!$leaveType) {
-            return response()->json(['message' => 'Leave Type not found'], 404);
+    public function store(StoreLeaveTypeRequest $request){
+    $validatedData = $request->validated();
+    try {
+            $data = $this->leaveTypeService->store($validatedData);
+            return $this->successResponse($data, 'Data Saved Successfully', 200);
+        } catch (\Exception $e) {
+        return $this->errorResponse([],[$e->getMessage()]);
+    }
+    }
+
+    public function getAllDetails(int $id){
+        try {
+            return $this->successResponse($this->leaveTypeService->getAllDetails($id));
+        }catch (\Exception $e){
+            return $this->errorResponse();
         }
-        return response()->json($leaveType);
     }
-
     // Add a new leaveType
-    public function store(Request $request)
-    {
-        $leaveType = new LeaveType();
-        $leaveType->lv_name = $request->lv_name;
-        $leaveType->lv_salary_deduct = $request->lv_salary_deduct;
-        $leaveType->lv_count_working_days = $request->lv_count_working_days;
-        $leaveType->lv_has_limit= $request->lv_has_limit;
-        $leaveType->lv_allow_attendance_bonus = $request->lv_allow_attendance_bonus;
-        $leaveType->lv_remarks = $request->lv_remarks;
-        $leaveType->lv_status= $request->lv_status;
-        $leaveType->save();
-        return $this->successResponse($leaveType, 'Data Saved Successfully', 200);
+    public function update(StoreLeaveTypeRequest $request, $id) {
+        try {
+            
+            Log::info('Update Request Data: ', $request->all());
+    
+            $userId = $this->checkPermission($request, 94);
+            $validatedData = $request->validated();
+            
+            Log::info('Validated Data: ', $validatedData);
+            
+            $this->leaveTypeService->update($validatedData, $id, $userId);
+            return $this->successResponse();
+        } catch (UnauthorizedException $e) {
+            return $this->errorResponse([], ["You don't have permission to update Division ...!"], 401);
+        } catch (\Exception $e) {
+            return $this->errorResponse([], $e->getMessage());
+        }
     }
+    
 
-    // Edit an existing leaveType
-    public function update(Request $request, $id)
+   
+public function destroy($id)
     {
         $leaveType = LeaveType::find($id);
         if (!$leaveType) {
             return $this->errorResponse('Leave Type not found', 404);
         }
-        $leaveType->lv_name = $request->lv_name;
-        $leaveType->lv_salary_deduct = $request->lv_salary_deduct;
-        $leaveType->lv_count_working_days = $request->lv_count_working_days;
-        $leaveType->lv_has_limit= $request->lv_has_limit;
-        $leaveType->lv_allow_attendance_bonus = $request->lv_allow_attendance_bonus;
-        $leaveType->lv_remarks = $request->lv_remarks;
-        $leaveType->lv_status= $request->lv_status;
+
+        $leaveType->lv_is_deleted = 1;
         $leaveType->save();
-
-        return $this->successResponse($leaveType,'Leave Type updated successfully', 200);
-    }
-
-    // Delete a leaveType
-    public function destroy($id)
-    {
-        $leaveType = leaveType::find($id);
-        if (!$leaveType) {
-            return $this->errorResponse('Leave Type not found', 404);
-        }
-
-        $leaveType->delete();
 
         return response()->json(['message' => 'Leave Type deleted successfully']);
     }
-}
-
+    
+    private function checkPermission(Request $request, int $privilegeId):int{
+        $response = Http::withHeaders([
+            'Authorization' => $request->header('Authorization')
+        ])->get('http://localhost:8002/api/permission/check/'.$privilegeId);
+        
+        Log::info('Permission Check Response: ', ['response' => $response->body()]);
+        
+        if($response->status() == 200){
+            return $response['data']['id'];
+        }
+        
+        throw new UnauthorizedException('Unauthorized...!');
+    }
+}  
