@@ -6,7 +6,7 @@ use App\Http\Controllers\EmployeeTrainingHistoryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\DepartmentController;
-// use App\Http\Controllers\API\LeaveTypeController; // Import the LeaveTypeController
+use App\Http\Controllers\API\LeaveTypeController;
 use App\Http\Controllers\API\EmployeeCategoryController;
 use App\Http\Controllers\API\DivisionController;
 use App\Http\Controllers\API\DesignationController;
@@ -38,25 +38,27 @@ Route::delete('departments/{id}', [DepartmentController::class, 'destroy']);
 Route::get('/departments/all', [DepartmentController::class, 'index']);
 Route::get('/departments/{id}', [DepartmentController::class, 'show']);
 
-Route::get('/category', [EmployeeCategoryController::class, 'index']);
-Route::get('/category/{id}', [EmployeeCategoryController::class, 'show']);
-Route::post('/category', [EmployeeCategoryController::class, 'store']);
-Route::put('/category/{id}', [EmployeeCategoryController::class, 'update']);
-Route::delete('/category/{id}', [EmployeeCategoryController::class, 'destroy']);
-
 Route::get('/division/getAll', [DivisionController::class, 'index']);
 Route::get('/division/{id}', [DivisionController::class, 'getAllDetails']);
 Route::post('/division', [DivisionController::class, 'store']);
 Route::put('/division/{id}', [DivisionController::class, 'update']);
 Route::delete('/division/{id}', [DivisionController::class, 'destroy']);
 
-Route::get('/designation', [DesignationController::class, 'index']);
-Route::get('/designation/{id}', [DesignationController::class, 'show']);
+Route::get('/category/getAll', [EmployeeCategoryController::class, 'index']);
+Route::get('/category/{id}', [EmployeeCategoryController::class, 'getAllDetails']);
+Route::post('/category', [EmployeeCategoryController::class, 'store']);
+Route::put('/category/{id}', [EmployeeCategoryController::class, 'update']);
+Route::delete('/category/{id}', [EmployeeCategoryController::class, 'destroy']);
+
+
+Route::get('/designation/getAll', [DesignationController::class, 'index']);
+Route::get('/designation/{id}', [DesignationController::class, 'getAllDetails']);
 Route::post('/designation', [DesignationController::class, 'store']);
 Route::put('/designation/{id}', [DesignationController::class, 'update']);
 Route::delete('/designation/{id}', [DesignationController::class, 'destroy']);
-Route::get('/qualification', [EducationQualificationController::class, 'index']);
-Route::get('/qualification/{id}', [EducationQualificationController::class, 'show']);
+
+Route::get('/qualification/getAll', [EducationQualificationController::class, 'index']);
+Route::get('/qualification/{id}', [EducationQualificationController::class, 'getAllDetails']);
 Route::post('/qualification', [EducationQualificationController::class, 'store']);
 Route::put('/qualification/{id}', [EducationQualificationController::class, 'update']);
 Route::delete('/qualification/{id}', [EducationQualificationController::class, 'destroy']);
@@ -85,13 +87,18 @@ Route::get('/trainingProgramme/{id}', [TrainingProgrammeController::class, 'show
 Route::post('/trainingProgramme', [TrainingProgrammeController::class, 'store']);
 Route::put('/trainingProgramme/{id}', [TrainingProgrammeController::class, 'update']);
 Route::delete('/trainingProgramme/{id}', [TrainingProgrammeController::class, 'destroy']);
-Route::post('/resignType', [ResignTypeController::class, 'index']);
-Route::get('/resignType/{id}', [ResignTypeController::class, 'show']);
+
+Route::post('/resignType/getAll', [ResignTypeController::class, 'index']);
+Route::get('/resignType/{id}', [ResignTypeController::class, 'getAllDetails']);
 Route::post('/resignType', [ResignTypeController::class, 'store']);
 Route::put('/resignType/{id}', [ResignTypeController::class, 'update']);
 Route::delete('/resignType/{id}', [ResignTypeController::class, 'destroy']);
 
-// Route::post('/leave-types', [LeaveTypeController::class, 'store']);
+Route::get('/leaveType/getAll', [LeaveTypeController::class, 'index']);
+Route::get('/leaveType/{id}', [LeaveTypeController::class, 'getAllDetails']);
+Route::post('/leaveType', [LeaveTypeController::class, 'store']);
+Route::put('/leaveType/{id}', [LeaveTypeController::class, 'update']);
+Route::delete('/leaveType/{id}', [LeaveTypeController::class, 'destroy']);
 
 Route::post('/personalDetails/add',[PersonalDetailsController::class,'store']);
 Route::get('/personalDetails/allForUsers',[PersonalDetailsController::class,'getAllForUsers']);

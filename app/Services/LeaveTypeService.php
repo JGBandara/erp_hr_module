@@ -11,10 +11,7 @@ class LeaveTypeService
     {
         $data = [];
 
-        if (array_key_exists('lv_code', $arr)) {
-            $data['lv_code'] = $arr['lv_code'];
-        }
-
+        
         if (array_key_exists('lv_name', $arr)) {
             $data['lv_name'] = $arr['lv_name'];
         }
@@ -37,8 +34,8 @@ class LeaveTypeService
         if (array_key_exists('lv_allow_attendance_bonus', $arr)) {
             $data['lv_allow_attendance_bonus'] = $arr['lv_allow_attendance_bonus'];
         }
-        if (array_key_exists('lv_remark', $arr)) {
-            $data['lv_remark'] = $arr['lv_remark'];
+        if (array_key_exists('lv_remarks', $arr)) {
+            $data['lv_remarks'] = $arr['lv_remarks'];
         }
 
         if (array_key_exists('lv_status', $arr)) {
@@ -55,7 +52,7 @@ class LeaveTypeService
          $details = LeaveType::all();
          $arr = array();
          foreach ($details as $type){
-             array_push($arr, ['id'=>$type->id,'lv_code'=>$type->lv_code, 'lv_name'=>$type->lv_name]);
+             array_push($arr, ['id'=>$type->id, 'lv_name'=>$type->lv_name]);
          }
          return $arr;
     }
@@ -67,10 +64,7 @@ class LeaveTypeService
     public function update(array $arr, int $id, int $modifiedBy){
         $LeaveType = LeaveType::find($id);
 
-        if (array_key_exists('lv_code', $arr)) {
-            $LeaveType->lv_code = $arr['lv_code'];
-        }
-
+        
         if (array_key_exists('lv_name', $arr)) {
             $LeaveType->lv_name = $arr['lv_name'];
         }
@@ -83,8 +77,8 @@ class LeaveTypeService
             $LeaveType->lv_count_working_days = $arr['lv_count_working_days'];
         }
 
-        if (array_key_exists('lv_remark', $arr)) {
-            $LeaveType->lv_remark = $arr['lv_remark'];
+        if (array_key_exists('lv_remarks', $arr)) {
+            $LeaveType->lv_remarks = $arr['lv_remarks'];
         }
 
         if (array_key_exists('lv_status', $arr)) {
@@ -93,6 +87,15 @@ class LeaveTypeService
 
 
         $LeaveType->modified_by = $modifiedBy;
+
+        $LeaveType->save();
+
+    }
+
+    public function destroy(array $arr, int $id, int $deletedBy){
+        $LeaveType = LeaveType::find($id);
+
+        $LeaveType->deleted_by = $deletedBy;
 
         $LeaveType->save();
 

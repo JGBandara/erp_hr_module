@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('hr_mst_designation', function (Blueprint $table) {
             $table->id();
-            $table->string('des_emp_cat_id')->unique();
-            $table->string('des_code');
+            $table->string('des_emp_cat_id');
+            $table->string('des_code')->unique();
             $table->string('des_name');
             $table->string('des_salary_scale_id');
             $table->string('des_ot_allowed');
@@ -24,7 +24,10 @@ return new class extends Migration
             $table->integer('des_dep_id');
             $table->string('des_duties');
             $table->string('des_remark');
-            $table->integer('des_status');
+            $table->string('des_status')->default(1);
+            $table->integer('des_is_deleted')->default(0);
+            $table->integer('des_modified_by')->nullable();
+            $table->integer('des_deleted_by')->nullable();
             $table->timestamps();
         });
     }

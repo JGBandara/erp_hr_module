@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreLeaveTypeRequest extends FormRequest
+class StoreResignTypeRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -21,15 +21,10 @@ class StoreLeaveTypeRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [ 
-            'lv_name' => 'required|string|max:255',
-            'lv_salary_deduct' => 'required',
-            'lv_count_working_days' => 'required',
-            'lv_default_count' => 'required|string|max:255', 
-            'lv_has_limit' => 'required',
-            'lv_allow_attendance_bonus' => 'required',
-            'lv_remarks' => 'nullable|string',
-            'lv_status' => 'required|boolean',
+        return [
+            'rsg_name' => 'required|string|max:255',
+            'rsg_remarks' => 'nullable|string',
+            'rsg_status' => 'required|boolean',
         ];
     }
 }

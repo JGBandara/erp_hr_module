@@ -9,6 +9,6 @@ class ResignType extends Model
 {
     use HasFactory;
     protected $table = 'hr_mst_resign_type';
-    protected $fillable = ['rsn_name', 'rsn_remark', 'rsn_status'];
+    protected $fillable = ['rsg_name', 'rsg_remarks', 'rsg_status'];
   
 }

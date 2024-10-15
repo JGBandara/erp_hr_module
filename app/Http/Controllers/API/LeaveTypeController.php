@@ -43,8 +43,8 @@ class LeaveTypeController extends Controller
             return $this->errorResponse();
         }
     }
-    // Add a new leaveType
-    public function update(StoreLeaveTypeRequest $request, $id) {
+    
+    public function update(StoreLeaveTypeRequest $request,int $id) {
         try {
             
             Log::info('Update Request Data: ', $request->all());
@@ -65,30 +65,38 @@ class LeaveTypeController extends Controller
     
 
    
-public function destroy($id)
-    {
+    public function destroy(Request $request, $id)
+{
+    try {
+       
+        $userId = $this->checkPermission($request, 94);
+
         $leaveType = LeaveType::find($id);
         if (!$leaveType) {
-            return $this->errorResponse('Leave Type not found', 404);
+            return $this->errorResponse([], ['Leave Type not found'], 404);
         }
 
-        $leaveType->lv_is_deleted = 1;
+        $leaveType->lv_deleted_by = $userId;
+        $leaveType->lv_is_deleted = 1; 
         $leaveType->save();
 
-        return response()->json(['message' => 'Leave Type deleted successfully']);
+
+        return $this->successResponse([], 'Leave Type deleted successfully.');
+    } catch (UnauthorizedException $e) {
+        return $this->errorResponse([], ["You don't have permission to delete this LeaveType...!"], 401);
+    } catch (\Exception $e) {
+        return $this->errorResponse([], [$e->getMessage()]);
     }
+}
     
-    private function checkPermission(Request $request, int $privilegeId):int{
-        $response = Http::withHeaders([
-            'Authorization' => $request->header('Authorization')
-        ])->get('http://localhost:8002/api/permission/check/'.$privilegeId);
-        
-        Log::info('Permission Check Response: ', ['response' => $response->body()]);
-        
-        if($response->status() == 200){
-            return $response['data']['id'];
-        }
-        
-        throw new UnauthorizedException('Unauthorized...!');
+private function checkPermission(Request $request, int $privilegeId):int{
+    $response = Http::withHeaders([
+        'Authorization' => $request->header('Authorization')
+    ])->get('http://localhost:8002/api/permission/check/'.$privilegeId);
+    if($response->status() == 200){
+        return $response['data']['id'];
     }
+
+    throw new UnauthorizedException('Unauthorized...!');
+}
 }  
