@@ -13,9 +13,12 @@ return new class extends Migration
     {
         Schema::create('hr_mst_resign_type', function (Blueprint $table) {
             $table->id();
-            $table->string('rsn_name');
-            $table->string('rsn_remark');
-            $table->integer('rsn_status');
+            $table->string('rsg_name');
+            $table->string('rsg_remarks');
+            $table->integer('rsg_status')->default(1);
+            $table->integer('rsg_is_deleted')->default(0);
+            $table->integer('rsg_modified_by')->nullable();
+            $table->integer('rsg_deleted_by')->nullable();
             $table->timestamps();
         });
     }

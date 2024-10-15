@@ -2,69 +2,86 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Exceptions\UnauthorizedException;
 use App\Http\Controllers\Controller;
 use App\Models\EducationQualification; 
+use App\Http\Requests\StoreEducationQualificationRequest;
 use Illuminate\Http\Request;
+use App\Services\EducationQualificationService;
 use App\Traits\ApiResponse;
+use Illuminate\Support\Facades\Http;
 
 class EducationQualificationController extends Controller
     {
         use ApiResponse;
-       
+        private EducationQualificationService $educationQualificationService;
+
+    public function __construct(EducationQualificationService $educationQualificationService){
+        $this->educationQualificationService=$educationQualificationService;
+    }
             public function index()
             {
-                $qualifications = EducationQualification::all();
-                return response()->json($qualifications);
+                return $this->educationQualificationService->getAll();
             }
         
-            // Load data (Get a specific qualification by ID)
-            public function show($id)
+            public function getAllDetails(int $id)
             {
-                $qualification = EducationQualification::find($id);
-                if (!$qualification) {
-                    return response()->json(['message' => 'EducationQualification not found'], 404);
+                try {
+                    return $this->successResponse($this->educationQualificationService->getAllDetails($id));
+                }catch (\Exception $e){
+                    return $this->errorResponse();
                 }
-                return response()->json($qualification);
             }
         
-            // Add a new qualification
-            public function store(Request $request)
+            public function store(StoreEducationQualificationRequest $request)
             {
-                $qualification = new EducationQualification();
-                $qualification->qua_name = $request->qua_name;
-                $qualification->qua_remark = $request->qua_remark;
-                $qualification->qua_status= $request->qua_status;
-                $qualification->save();
-                return $this->successResponse($qualification, 'Data Saved Successfully', 200);
-            }
-        
-            // Edit an existing qualification
-            public function update(Request $request, $id)
-            {
-                $qualification = EducationQualification::find($id);
-                if (!$qualification) {
-                    return $this->errorResponse('EducationQualification not found', 404);
+                $validatedData = $request->validated();
+                try {
+                    $data = $this->educationQualificationService->store($validatedData);
+                    return $this->successResponse($data,'Data saved successful',200);
+                }catch (\Exception $e){
+                    return $this->errorResponse([],[$e->getMessage()]);
                 }
-               
-                $qualification->qua_name = $request->qua_name;
-                $qualification->qua_remark = $request->qua_remark;
-                $qualification->qua_status= $request->qua_status;
-                $qualification->save();
-        
-                return $this->successResponse($qualification,'EducationQualification updated successfully', 200);
             }
         
-            // Delete a qualification
+            public function update(StoreEducationQualificationRequest $request, $id)
+            {
+                try{
+                    $userId =  $this->checkPermission($request, 94);
+                    $validatedData = $request->validated();
+                    $this->educationQualificationService->update($validatedData, $id, $userId);
+                    return $this->successResponse();
+                }catch (UnauthorizedException $e){
+                    return $this->errorResponse([],["You don't have permission to update Education Details...!"],401);
+                }catch (\Exception $e){
+                    return $this->errorResponse([],$e->getMessage());
+                }
+            }
+        
+            private function checkPermission(Request $request, int $privilegeId):int{
+                $response = Http::withHeaders([
+                    'Authorization' => $request->header('Authorization')
+                ])->get('http://localhost:8002/api/permission/check/'.$privilegeId);
+                if($response->status() == 200){
+                    return $response['data']['id'];
+                }
+        
+                throw new UnauthorizedException('Unauthorized...!');
+        }
+          
             public function destroy($id)
             {
-                $qualification = EducationQualification::find($id);
-                if (!$qualification) {
-                    return $this->errorResponse('EducationQualification not found', 404);
+                 $educationQualification = EducationQualification::find($id);
+                if (!$educationQualification) {
+                    return $this->errorResponse('Qualification not found', 404);
                 }
+                $userId = $this->checkPermission($request, 94);
+                $educationQualification->qua_deleted_by = $userId;
+                $educationQualification->qua_is_deleted = 1;
+                $educationQualification->save();
         
-                $qualification->delete();
-        
-                return response()->json(['message' => 'EducationQualification deleted successfully']);
+                return response()->json(['message' => 'Qualification deleted successfully']);
+         
             }
         }
         

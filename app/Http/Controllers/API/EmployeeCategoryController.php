@@ -73,7 +73,7 @@ class EmployeeCategoryController extends Controller
         if (!$category) {
             return $this->errorResponse('Category not found', 404);
         }
-
+        $userId = $this->checkPermission($request, 94);
         $category->emp_cat_is_deleted = 1;
         $category->emp_cat_deleted_by = $userId;
         $category->save();

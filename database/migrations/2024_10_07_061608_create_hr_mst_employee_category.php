@@ -21,9 +21,7 @@ return new class extends Migration
             $table->string('emp_cat_status')->default(1);
             $table->integer('emp_cat_is_deleted')->default(0);
             $table->integer('emp_cat_modified_by')->nullable();
-            $table->integer('emp_cat_modified_on')->nullable()->timestamps();
             $table->integer('emp_cat_deleted_by')->nullable();
-            $table->integer('emp_cat_deleted_on')->nullable()->timestamps();
             $table->timestamps();
         });
     }

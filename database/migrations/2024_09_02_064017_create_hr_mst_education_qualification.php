@@ -15,7 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('qua_name');
             $table->string('qua_remark');
-            $table->integer('dep_status');
+            $table->string('qua_status')->default(1);
+            $table->integer('qua_is_deleted')->default(0);
+            $table->integer('qua_modified_by')->nullable();
+            $table->integer('qua_deleted_by')->nullable();
             $table->timestamps();
         });
     }
