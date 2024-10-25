@@ -22,18 +22,18 @@ class StoreDesignationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'des_code' => 'required|string|max:255', 
+            'des_code' => 'required|string|max:255',
             'des_name' => 'required|string|max:255',
-            'des_emp_cat_id' => 'required',
+            'des_emp_cat_id' => 'required|int',
             'des_salary_scale_id' => 'nullable|int',
-            'des_ot_allowed' => 'required|boolean', 
+            'des_ot_allowed' => 'required|boolean',
             'des_early_ot_allowed' => 'required|boolean',
             'des_carder' => 'nullable|string',
             'des_rank' => 'nullable|int',
-            'des_dep_id' => 'required',
+            'des_dep' => 'required|array|min:1',
             'des_duties' => 'nullable|int',
-            'div_remark' => 'nullable|string',
-            'div_status' => 'required|boolean',
+            'des_remark' => 'nullable|string',
+            'des_status' => 'required|boolean',
         ];
     }
 }

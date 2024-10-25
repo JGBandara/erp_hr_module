@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class EmployeeTrainingHistoryController extends Controller
 {
-    public function store(StoreEmployeeTrainingHistoryRequest $request){
-        return "OK";
+    public function store(Request $request){
+        return $request;
     }
 }

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Exceptions\UnauthorizedException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreEmployeeCategoryRequest;
-use App\Models\EmployeeCategory; 
+use App\Models\EmployeeCategory;
 use Illuminate\Http\Request;
 use App\Services\EmployeeCategoryService;
 use App\Traits\ApiResponse;
@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Log;
 class EmployeeCategoryController extends Controller
 {
     use ApiResponse;
-    private EmployeeCategoryService $employeeCategoryService; 
+    private EmployeeCategoryService $employeeCategoryService;
 
     public function __construct(EmployeeCategoryService $employeeCategoryService){
         $this->EmployeeCategoryService=$employeeCategoryService;
@@ -39,25 +39,25 @@ class EmployeeCategoryController extends Controller
     {
         $validatedData = $request->validated();
         try {
-      
+
             $data = $this->EmployeeCategoryService->store($validatedData);
             return $this->successResponse($data, 'Data Saved Successfully', 200);
         } catch (\Exception $e) {
             return $this->errorResponse([],[$e->getMessage()]);
         }
     }
-  
+
     public function update(StoreEmployeeCategoryRequest $request, $id)
     {
         try {
-                    
+
             Log::info('Update Request Data: ', $request->all());
-    
+
             $userId = $this->checkPermission($request, 94);
             $validatedData = $request->validated();
-            
+
             Log::info('Validated Data: ', $validatedData);
-            
+
             $this->EmployeeCategoryService->update($validatedData, $id, $userId);
             return $this->successResponse();
         } catch (UnauthorizedException $e) {
@@ -67,7 +67,7 @@ class EmployeeCategoryController extends Controller
         }
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         $category = EmployeeCategory::find($id);
         if (!$category) {
@@ -84,14 +84,14 @@ class EmployeeCategoryController extends Controller
         $response = Http::withHeaders([
             'Authorization' => $request->header('Authorization')
         ])->get('http://localhost:8002/api/permission/check/'.$privilegeId);
-        
+
         Log::info('Permission Check Response: ', ['response' => $response->body()]);
-        
+
         if($response->status() == 200){
             return $response['data']['id'];
         }
-        
+
         throw new UnauthorizedException('Unauthorized...!');
-        
+
 }
 }

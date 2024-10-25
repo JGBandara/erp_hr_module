@@ -9,7 +9,7 @@ class EmployeeCategoryService
 {
     private function createArray(array $arr): array
     {
-        $data = []; 
+        $data = [];
 
         if (array_key_exists('emp_cat_code', $arr)) {
             $data['emp_cat_code'] = $arr['emp_cat_code'];
@@ -42,7 +42,7 @@ class EmployeeCategoryService
     }
 
     public function getAll(){
-         $details = EmployeeCategory::all();
+         $details = EmployeeCategory::all()->where('emp_cat_is_deleted',0);
          $arr = array();
          foreach ($details as $div){
              array_push($arr, ['id'=>$div->id,'emp_cat_code'=>$div->emp_cat_code, 'emp_cat_name'=>$div->emp_cat_name]);
@@ -55,7 +55,7 @@ class EmployeeCategoryService
     }
 
     public function update(array $arr, int $id, int $modifiedBy){
-        
+
         $category = EmployeeCategory::find($id);
 
         if (array_key_exists('emp_cat_code', $arr)) {

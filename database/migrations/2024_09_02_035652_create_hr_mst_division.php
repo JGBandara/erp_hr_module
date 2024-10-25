@@ -19,13 +19,13 @@ return new class extends Migration
             $table->integer('div_dep_id');
             $table->integer('div_head');
             $table->string('div_remark')->nullable();
-            $table->integer('div_status');
+            $table->integer('div_status')->default(1);
             $table->integer('div_is_deleted')->default(0);
             $table->integer('div_modified_by')->nullable();
             $table->timestamps();
         });
     }
-    
+
 
     /**
      * Reverse the migrations.

@@ -82,7 +82,7 @@ class DivisionService
         }
 
 
-        $division->modified_by = $modifiedBy;
+        $division->div_modified_by = $modifiedBy;
 
         $division->save();
 

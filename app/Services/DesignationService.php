@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Department;
 use App\Models\Designation;
 use Illuminate\Support\Facades\Http;
 
@@ -52,10 +53,23 @@ class DesignationService
             $data['des_status'] = $arr['des_status'];
         }
 
+        if (array_key_exists('des_emp_cat_id', $arr)) {
+            $data['des_emp_cat_id'] = $arr['des_emp_cat_id'];
+        }
+
         return $data;
     }
-    public function store(array $arr): Designation{
-        return Designation::create($this->createArray($arr));
+    public function store(array $arr){
+        $arr['des_salary_scale_id'] = 1;
+//        return $arr['des_emp_cat_id'];
+//        return $arr;
+        $designation = Designation::create($this->createArray($arr));
+//        return $designation->id;
+        foreach ($arr['des_dep'] as $depId){
+            Designation::find($designation->id)->departments()->attach($depId);
+        }
+//        return count($arr['des_dep']);
+        return $designation;
     }
 
     public function getAll(){
@@ -74,7 +88,7 @@ class DesignationService
     public function update(array $arr, int $id, int $modifiedBy){
         $designation = Designation::find($id);
 
-       
+
         if (array_key_exists('des_code', $arr)) {
             $data['des_code'] = $arr['des_code'];
         }

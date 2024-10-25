@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\API\DistrictsController;
+use App\Http\Controllers\API\EmployeeHistoryController;
 use App\Http\Controllers\API\PersonalDetailsController;
+use App\Http\Controllers\API\TypeController;
 use App\Http\Controllers\EmployeeTrainingHistoryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -38,6 +40,13 @@ Route::delete('departments/{id}', [DepartmentController::class, 'destroy']);
 Route::get('/departments/all', [DepartmentController::class, 'index']);
 Route::get('/departments/{id}', [DepartmentController::class, 'show']);
 
+
+Route::get('/category/getAll', [EmployeeCategoryController::class, 'index']);
+Route::get('/category/{id}', [EmployeeCategoryController::class, 'getAllDetails']);
+Route::post('/category', [EmployeeCategoryController::class, 'store']);
+Route::put('/category/{id}', [EmployeeCategoryController::class, 'update']);
+Route::delete('/category/{id}', [EmployeeCategoryController::class, 'destroy']);
+
 Route::get('/division/getAll', [DivisionController::class, 'index']);
 Route::get('/division/{id}', [DivisionController::class, 'getAllDetails']);
 Route::post('/division', [DivisionController::class, 'store']);
@@ -59,9 +68,12 @@ Route::delete('/designation/{id}', [DesignationController::class, 'destroy']);
 
 Route::get('/qualification/getAll', [EducationQualificationController::class, 'index']);
 Route::get('/qualification/{id}', [EducationQualificationController::class, 'getAllDetails']);
+Route::get('/qualification/getAll', [EducationQualificationController::class, 'index']);
+Route::get('/qualification/{id}', [EducationQualificationController::class, 'getA']);
 Route::post('/qualification', [EducationQualificationController::class, 'store']);
 Route::put('/qualification/{id}', [EducationQualificationController::class, 'update']);
 Route::delete('/qualification/{id}', [EducationQualificationController::class, 'destroy']);
+
 Route::get('/ebExamType', [EbExamTypeController::class, 'index']);
 Route::get('/ebExamType/{id}', [EbExamTypeController::class, 'show']);
 Route::post('/ebExamType', [EbExamTypeController::class, 'store']);
@@ -82,6 +94,7 @@ Route::get('/EBExam/{id}', [EbExamController::class, 'show']);
 Route::post('/EBExam', [EbExamController::class, 'store']);
 Route::put('/EBExam/{id}', [EbExamController::class, 'update']);
 Route::delete('/EBExam/{id}', [EbExamController::class, 'destroy']);
+
 Route::post('/trainingProgramme', [TrainingProgrammeController::class, 'index']);
 Route::get('/trainingProgramme/{id}', [TrainingProgrammeController::class, 'show']);
 Route::post('/trainingProgramme', [TrainingProgrammeController::class, 'store']);
@@ -106,3 +119,7 @@ Route::get('/personalDetails/{id}',[PersonalDetailsController::class,'getAllDeta
 Route::put('/personalDetails/{id}',[PersonalDetailsController::class,'update']);
 
 Route::get('/employeeTrainingHistory/add',[EmployeeTrainingHistoryController::class,'store']);
+
+Route::post('/employee/history/add',[EmployeeHistoryController::class,'store']);
+
+Route::get('/hr/types/all', [TypeController::class,'getAll']);

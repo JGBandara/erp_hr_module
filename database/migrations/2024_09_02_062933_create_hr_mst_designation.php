@@ -21,7 +21,6 @@ return new class extends Migration
             $table->string('des_early_ot_allowed');
             $table->integer('des_carder');
             $table->integer('des_rank');
-            $table->integer('des_dep_id');
             $table->string('des_duties');
             $table->string('des_remark');
             $table->string('des_status')->default(1);
