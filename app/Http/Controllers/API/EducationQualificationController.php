@@ -76,7 +76,7 @@ class EducationQualificationController extends Controller
                 throw new UnauthorizedException('Unauthorized...!');
         }
 
-            public function destroy($id)
+            public function destroy(Request $request,int $id)
             {
                  $educationQualification = EducationQualification::find($id);
                 if (!$educationQualification) {
