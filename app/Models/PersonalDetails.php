@@ -28,4 +28,19 @@ class PersonalDetails extends Model
         'residence_phone_number',
         'emerg_phone_and_cont_num',
     ];
+    public function history(){
+        return $this->hasMany(EmployeeHistory::class,'emp_id','id');
+    }
+    public function olResults(){
+        return $this->hasMany(OLExamination::class,'emp_id','id');
+    }
+    public function alResults(){
+        return $this->hasMany(ALExamination::class,'emp_id','id');
+    }
+    public function professionalQualifications(){
+        return $this->hasMany(ProfessionalQualification::class,'emp_id','id');
+    }
+    public function dependents(){
+        return $this->hasMany(Dependent::class,'emp_id','id');
+    }
 }

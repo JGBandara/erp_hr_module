@@ -25,4 +25,11 @@ class EmployeeHistoryController extends Controller
 
         return $this->employeeHistoryService->store($validatedData);
     }
+    public function getAllBelongsTo(int $id, Request $request){
+        try {
+            return $this->successResponse($this->employeeHistoryService->getAllBelongsTo($id));
+        }catch (\Exception $e){
+            return $this->successResponse([]);
+        }
+    }
 }

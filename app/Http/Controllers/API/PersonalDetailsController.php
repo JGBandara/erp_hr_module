@@ -41,6 +41,14 @@ class PersonalDetailsController extends Controller
         }
     }
 
+    public function getAll(){
+        try {
+            return $this->successResponse($this->personalDetailsService->getAll());
+        }catch (\Exception $e){
+            return $this->errorResponse();
+        }
+    }
+
     public function update(StorePersonalDetailsRequest $request, int $id){
 
         try{

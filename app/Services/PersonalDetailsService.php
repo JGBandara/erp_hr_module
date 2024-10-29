@@ -96,6 +96,9 @@ class PersonalDetailsService
          }
          return $arr;
     }
+    public function getAll(){
+        return PersonalDetails::all();
+    }
 
     public function getAllDetails(int $id){
         return PersonalDetails::find($id);
@@ -176,6 +179,10 @@ class PersonalDetailsService
 
         $personalDetails->save();
 
+    }
+
+    public function getAllHistory(int $empId){
+        return PersonalDetails::find($empId)->history;
     }
 
 

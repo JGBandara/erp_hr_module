@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\API\DependentController;
 use App\Http\Controllers\API\DistrictsController;
 use App\Http\Controllers\API\EmployeeHistoryController;
 use App\Http\Controllers\API\PersonalDetailsController;
+use App\Http\Controllers\API\QualificationController;
 use App\Http\Controllers\API\TypeController;
 use App\Http\Controllers\EmployeeTrainingHistoryController;
 use Illuminate\Http\Request;
@@ -115,11 +117,22 @@ Route::delete('/leaveType/{id}', [LeaveTypeController::class, 'destroy']);
 
 Route::post('/personalDetails/add',[PersonalDetailsController::class,'store']);
 Route::get('/personalDetails/allForUsers',[PersonalDetailsController::class,'getAllForUsers']);
+Route::get('/personalDetails/all',[PersonalDetailsController::class,'getAll']);
 Route::get('/personalDetails/{id}',[PersonalDetailsController::class,'getAllDetails']);
 Route::put('/personalDetails/{id}',[PersonalDetailsController::class,'update']);
 
 Route::get('/employeeTrainingHistory/add',[EmployeeTrainingHistoryController::class,'store']);
 
 Route::post('/employee/history/add',[EmployeeHistoryController::class,'store']);
+Route::get('/employee/history/getAll/{id}',[EmployeeHistoryController::class,'getAllBelongsTo']);
+Route::post('/employee/education/ol',[QualificationController::class,'storeOL']);
+Route::get('/employee/education/ol/{id}',[QualificationController::class,'getOLResults']);
+Route::post('/employee/education/al',[QualificationController::class,'storeAL']);
+Route::get('/employee/education/al/{id}',[QualificationController::class,'getALResults']);
+Route::post('/employee/education/prof',[QualificationController::class,'storeProfessionalQualifications']);
+Route::get('/employee/education/prof/{id}',[QualificationController::class,'getProfessionalQualifications']);
+
+Route::post('/employee/dependent/add',[DependentController::class,'store']);
+Route::get('/employee/dependent/{id}',[DependentController::class,'getAll']);
 
 Route::get('/hr/types/all', [TypeController::class,'getAll']);
