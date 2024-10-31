@@ -6,7 +6,7 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class StoreDesignationRequest extends FormRequest
+class StoreDepartmentRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,18 +24,10 @@ class StoreDesignationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'des_code' => 'required|string|max:255',
-            'des_name' => 'required|string|max:255',
-            'des_emp_cat_id' => 'required|int',
-            'des_salary_scale_id' => 'nullable|int',
-            'des_ot_allowed' => 'required|boolean',
-            'des_early_ot_allowed' => 'required|boolean',
-            'des_carder' => 'nullable|string',
-            'des_rank' => 'nullable|int',
-            'des_dep' => 'required|array|min:1',
-            'des_duties' => 'nullable|int',
-            'des_remark' => 'nullable|string',
-            'des_status' => 'required|boolean',
+            'department_code' => 'required|string|unique:hr_mst_department,dep_code',
+            'department_name' => 'required|string|max:255',
+            'remark' => 'nullable|string',
+            'active' => 'required|boolean',
         ];
     }
     protected function failedValidation(Validator $validator)

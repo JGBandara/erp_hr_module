@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class StorePersonalDetailsRequest extends FormRequest
 {
@@ -40,5 +42,14 @@ class StorePersonalDetailsRequest extends FormRequest
             'residence_phone_number' => 'required|string|max:15',
             'emerg_phone_and_cont_num' => 'string|max:15',
         ];
+    }
+    protected function failedValidation(Validator $validator)
+    {
+        $response = response()->json([
+            'status' => 'error',
+            'message' => 'Validation errors',
+            'errors' => $validator->errors(),
+        ], 422);
+        throw new HttpResponseException($response);
     }
 }

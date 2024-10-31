@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class StoreLeaveTypeRequest extends FormRequest
 {
@@ -21,15 +23,24 @@ class StoreLeaveTypeRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [ 
+        return [
             'lv_name' => 'required|string|max:255',
             'lv_salary_deduct' => 'required',
             'lv_count_working_days' => 'required',
-            'lv_default_count' => 'required|string|max:255', 
+            'lv_default_count' => 'required|string|max:255',
             'lv_has_limit' => 'required',
             'lv_allow_attendance_bonus' => 'required',
             'lv_remarks' => 'nullable|string',
             'lv_status' => 'required|boolean',
         ];
+    }
+    protected function failedValidation(Validator $validator)
+    {
+        $response = response()->json([
+            'status' => 'error',
+            'message' => 'Validation errors',
+            'errors' => $validator->errors(),
+        ], 422);
+        throw new HttpResponseException($response);
     }
 }

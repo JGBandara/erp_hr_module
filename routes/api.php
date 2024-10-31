@@ -39,7 +39,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::post('departments', [DepartmentController::class, 'store']);
 Route::put('departments/{id}', [DepartmentController::class, 'update']);
 Route::delete('departments/{id}', [DepartmentController::class, 'destroy']);
-Route::get('/departments/all', [DepartmentController::class, 'index']);
+Route::get('/departments/all', [DepartmentController::class, 'getAll']);
 Route::get('/departments/{id}', [DepartmentController::class, 'show']);
 
 
