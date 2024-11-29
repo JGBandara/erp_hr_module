@@ -2,92 +2,84 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Exceptions\UnauthorizedException;
+use App\Exceptions\CRUDException;
 use App\Http\Controllers\Controller;
-use App\Models\EducationQualification;
 use App\Http\Requests\StoreEducationQualificationRequest;
+use App\Services\AuthService;
 use Illuminate\Http\Request;
 use App\Services\EducationQualificationService;
 use App\Traits\ApiResponse;
-use Illuminate\Support\Facades\Http;
 
 class EducationQualificationController extends Controller
+{
+    use ApiResponse;
+
+    private EducationQualificationService $educationQualificationService;
+    private AuthService $authService;
+
+    public function __construct(EducationQualificationService $educationQualificationService, AuthService $authService)
     {
-        use ApiResponse;
-        private EducationQualificationService $educationQualificationService;
-
-    public function __construct(EducationQualificationService $educationQualificationService){
-        $this->educationQualificationService=$educationQualificationService;
+        $this->educationQualificationService = $educationQualificationService;
+        $this->authService = $authService;
     }
-            public function index()
-            {
-                return $this->educationQualificationService->getAll();
-            }
 
-            public function getAllDetails(int $id)
-            {
-                try {
-                    return $this->successResponse($this->educationQualificationService->getAllDetails($id));
-                }catch (\Exception $e){
-                    return $this->errorResponse();
-                }
-            }
+    public function index()
+    {
+        return $this->educationQualificationService->getAll();
+    }
 
-            public function store(StoreEducationQualificationRequest $request)
-            {
+    public function getAllDetails(int $id)
+    {
+        try {
+            return $this->successResponse($this->educationQualificationService->getAllDetails($id));
+        } catch (\Exception $e) {
+            return $this->errorResponse();
+        }
+    }
+
+    public function store(StoreEducationQualificationRequest $request)
+    {
+        if($this->authService->checkPermission($request, 'add','human-resource/master-data/education-qualifications/manage')){
+            $validatedData = $request->validated();
+            try {
+                $data = $this->educationQualificationService->store($validatedData);
+                return $this->successResponse($data, 'Data saved successful', 200);
+            } catch (\Exception $e) {
+                return $this->errorResponse($e->getMessage());
+            }
+        }
+        return $this->errorResponse("You don't have permission to add Education qualification",[],401);
+
+    }
+
+    public function update(StoreEducationQualificationRequest $request, $id)
+    {
+        if($this->authService->checkPermission($request, 'edit','human-resource/master-data/education-qualifications/manage')){
+            try {
+                $userId = $this->authService->getAuthUser($request);
                 $validatedData = $request->validated();
-                try {
-                    $data = $this->educationQualificationService->store($validatedData);
-                    return $this->successResponse($data,'Data saved successful',200);
-                }catch (\Exception $e){
-                    return $this->errorResponse([],[$e->getMessage()]);
-                }
-            }
-
-            public function update(StoreEducationQualificationRequest $request, $id)
-            {
-//                return $this->checkPermission($request, 'edit','human-resource/master-data/education-qualifications/manage');
-                try{
-                    $userId =  $this->checkPermission($request, 'edit','human-resource/master-data/education-qualifications/manage');
-                    $validatedData = $request->validated();
-                    $this->educationQualificationService->update($validatedData, $id, $userId);
-                    return $this->successResponse();
-                }catch (UnauthorizedException $e){
-                    return $this->errorResponse([],["You don't have permission to update Education Details...!"],401);
-                }catch (\Exception $e){
-                    return $this->errorResponse([],$e->getMessage());
-                }
-            }
-
-            private function checkPermission(Request $request, string $privilege, string $module){
-                $response = Http::withHeaders([
-                    'Authorization' => $request->header('Authorization')
-                ])->post('http://localhost:8002/api/permission/check/path',[
-                    'path'=>$module,
-                    'privilege'=>$privilege,
-                ]);
-
-//                return $response;
-
-                if($response->status() == 200){
-                    return $response['data']['id'];
-                }
-
-                throw new UnauthorizedException('Unauthorized...!');
-        }
-
-            public function destroy(Request $request,int $id)
-            {
-                 $educationQualification = EducationQualification::find($id);
-                if (!$educationQualification) {
-                    return $this->errorResponse('Qualification not found', 404);
-                }
-                $userId = $this->checkPermission($request, 94);
-                $educationQualification->qua_deleted_by = $userId;
-                $educationQualification->qua_is_deleted = 1;
-                $educationQualification->save();
-
-                return response()->json(['message' => 'Qualification deleted successfully']);
-
+                $this->educationQualificationService->update($validatedData, $id, $userId);
+                return $this->successResponse();
+            } catch(CRUDException $e){
+                return $this->errorResponse($e->getMessage());
+            } catch (\Exception $e) {
+                return $this->errorResponse([], $e->getMessage());
             }
         }
+        return $this->errorResponse("You don't have permission to update education qualification",[],401);
+    }
+
+    public function destroy(Request $request, int $id)
+    {
+        if($this->authService->checkPermission($request, 'remove','human-resource/master-data/education-qualifications/manage')){
+            try {
+                $userId = $this->authService->getAuthUser($request);
+                $this->educationQualificationService->delete($id, $userId);
+                return $this->successResponse();
+            }catch (CRUDException $e){
+                return $this->errorResponse($e->getMessage());
+            }
+        }
+        return $this->errorResponse("You don't have permission to delete education qualification", [], 401);
+    }
+}

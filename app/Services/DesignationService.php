@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\CRUDException;
 use App\Models\Department;
 use App\Models\Designation;
 use Illuminate\Support\Facades\Http;
@@ -61,14 +62,11 @@ class DesignationService
     }
     public function store(array $arr){
         $arr['des_salary_scale_id'] = 1;
-//        return $arr['des_emp_cat_id'];
-//        return $arr;
+
         $designation = Designation::create($this->createArray($arr));
-//        return $designation->id;
         foreach ($arr['des_dep'] as $depId){
             Designation::find($designation->id)->departments()->attach($depId);
         }
-//        return count($arr['des_dep']);
         return $designation;
     }
 
@@ -132,6 +130,19 @@ class DesignationService
 
 
         $designation->des_modified_by = $modifiedBy;
+
+        $designation->save();
+
+    }
+
+    public function delete($id, $userId){
+        $designation = Designation::find($id);
+        if(!$designation){
+            throw new CRUDException("Designation not found");
+        }
+
+        $designation->des_is_deleted = 1;
+        $designation->des_deleted_by = $userId;
 
         $designation->save();
 

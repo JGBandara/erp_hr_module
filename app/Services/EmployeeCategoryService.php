@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
+use App\Exceptions\CRUDException;
 use App\Models\EmployeeCategory;
-use Illuminate\Support\Facades\Http;
 
 class EmployeeCategoryService
 {
@@ -42,12 +42,10 @@ class EmployeeCategoryService
     }
 
     public function getAll(){
-         $details = EmployeeCategory::all()->where('emp_cat_is_deleted',0);
-         $arr = array();
-         foreach ($details as $div){
-             array_push($arr, ['id'=>$div->id,'emp_cat_code'=>$div->emp_cat_code, 'emp_cat_name'=>$div->emp_cat_name]);
-         }
-         return $arr;
+         $details = EmployeeCategory::where('emp_cat_is_deleted',0)
+             ->select('id','emp_cat_code','emp_cat_name')
+             ->get();
+         return $details;
     }
 
     public function getAllDetails(int $id){
@@ -57,6 +55,10 @@ class EmployeeCategoryService
     public function update(array $arr, int $id, int $modifiedBy){
 
         $category = EmployeeCategory::find($id);
+
+        if (!$category) {
+            throw new CRUDException('Category not found');
+        }
 
         if (array_key_exists('emp_cat_code', $arr)) {
             $category->emp_cat_code = $arr['emp_cat_code'];

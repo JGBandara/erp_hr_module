@@ -2,27 +2,28 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Exceptions\UnauthorizedException;
+use App\Exceptions\CRUDException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreEmployeeCategoryRequest;
-use App\Models\EmployeeCategory;
+use App\Services\AuthService;
 use Illuminate\Http\Request;
 use App\Services\EmployeeCategoryService;
 use App\Traits\ApiResponse;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class EmployeeCategoryController extends Controller
 {
     use ApiResponse;
     private EmployeeCategoryService $employeeCategoryService;
+    private AuthService $authService;
 
-    public function __construct(EmployeeCategoryService $employeeCategoryService){
+    public function __construct(EmployeeCategoryService $employeeCategoryService, AuthService $authService){
         $this->EmployeeCategoryService=$employeeCategoryService;
+        $this->authService = $authService;
     }
     public function index()
     {
-        return $this->EmployeeCategoryService->getAll();
+        return $this->successResponse($this->EmployeeCategoryService->getAll());
     }
 
 
@@ -37,61 +38,51 @@ class EmployeeCategoryController extends Controller
 
     public function store(StoreEmployeeCategoryRequest $request)
     {
-        $validatedData = $request->validated();
-        try {
+        if ($this->authService->checkPermission($request, 'add', 'human-resource/master-data/employee-category/add-new')){
+            $validatedData = $request->validated();
 
-            $data = $this->EmployeeCategoryService->store($validatedData);
-            return $this->successResponse($data, 'Data Saved Successfully', 200);
-        } catch (\Exception $e) {
-            return $this->errorResponse([],[$e->getMessage()]);
+            try {
+                $data = $this->EmployeeCategoryService->store($validatedData);
+                return $this->successResponse($data, 'Data Saved Successfully', 200);
+            } catch (\Exception $e) {
+                return $this->errorResponse($e->getMessage());
+            }
         }
+        return $this->errorResponse("You don't have permission to add employee category",[],401);
+
     }
 
     public function update(StoreEmployeeCategoryRequest $request, $id)
     {
-        try {
-
-            Log::info('Update Request Data: ', $request->all());
-
-            $userId = $this->checkPermission($request, 94);
+        if($this->authService->checkPermission($request, 'edit', 'human-resource/master-data/employee-category/add-new')){
             $validatedData = $request->validated();
+            try {
+                Log::info('Update Request Data: ', $request->all());
+                $userId = $this->authService->getAuthUser($request);
 
-            Log::info('Validated Data: ', $validatedData);
-
-            $this->EmployeeCategoryService->update($validatedData, $id, $userId);
-            return $this->successResponse();
-        } catch (UnauthorizedException $e) {
-            return $this->errorResponse([], ["You don't have permission to update Employee Category ...!"], 401);
-        } catch (\Exception $e) {
-            return $this->errorResponse([], $e->getMessage());
+                $this->EmployeeCategoryService->update($validatedData, $id, $userId);
+                return $this->successResponse();
+            } catch (\Exception $e) {
+                return $this->errorResponse([], $e->getMessage());
+            }
         }
+        return $this->errorResponse([], ["You don't have permission to update Employee Category ...!"], 401);
+
     }
 
     public function destroy(Request $request, $id)
     {
-        $category = EmployeeCategory::find($id);
-        if (!$category) {
-            return $this->errorResponse('Category not found', 404);
+        if($this->authService->checkPermission($request, 'remove', 'human-resource/master-data/employee-category/add-new')){
+            try {
+                $userId = $this->authService->getAuthUser($request);
+                $data = ['emp_cat_is_deleted' => 1];
+                $this->EmployeeCategoryService->update($data, $id, $userId);
+                return $this->successResponse();
+            }catch (CRUDException $e){
+                return $this->errorResponse('Invalid category', $e->getMessage());
+            }
         }
-        $userId = $this->checkPermission($request, 94);
-        $category->emp_cat_is_deleted = 1;
-        $category->emp_cat_deleted_by = $userId;
-        $category->save();
 
-        return response()->json(['message' => 'Category deleted successfully']);
+        return $this->errorResponse("You don't have permission to remove employee category",[],401);
     }
-    private function checkPermission(Request $request, int $privilegeId):int{
-        $response = Http::withHeaders([
-            'Authorization' => $request->header('Authorization')
-        ])->get('http://localhost:8002/api/permission/check/'.$privilegeId);
-
-        Log::info('Permission Check Response: ', ['response' => $response->body()]);
-
-        if($response->status() == 200){
-            return $response['data']['id'];
-        }
-
-        throw new UnauthorizedException('Unauthorized...!');
-
-}
 }

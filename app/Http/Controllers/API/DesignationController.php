@@ -2,94 +2,91 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Exceptions\CRUDException;
 use App\Exceptions\UnauthorizedException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreDesignationRequest;
-use App\Models\Designation;
+use App\Services\AuthService;
 use Illuminate\Http\Request;
 use App\Services\DesignationService;
 use App\Traits\ApiResponse;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 
 class DesignationController extends Controller
 {
     use ApiResponse;
-    private DesignationService $designationService;
 
-    public function __construct(DesignationService $designationService){
+    private DesignationService $designationService;
+    private AuthService $authService;
+
+    public function __construct(DesignationService $designationService, AuthService $authService)
+    {
         $this->designationService = $designationService;
+        $this->authService = $authService;
     }
+
     public function index()
     {
         return $this->successResponse($this->designationService->getAll());
     }
 
 
-    public function store(StoreDesignationRequest $request){
-        $validatedData = $request->validated();
-        try {
-            $data = $this->designationService->store($validatedData);
-            return $this->successResponse($data, 'Data Saved Successfully', 200);
-        } catch (\Exception $e) {
-            return $this->errorResponse([],[$e->getMessage()]);
-        }
-    }
-
-    public function getAllDetails(int $id){
+    public function store(StoreDesignationRequest $request)
+    {
+        if ($this->authService->checkPermission($request, 'add', 'human-resource/master-data/manage-cardre/add-new')) {
+            $validatedData = $request->validated();
             try {
-                return $this->successResponse($this->designationService->getAllDetails($id));
-            }catch (\Exception $e){
-                return $this->errorResponse();
+                $data = $this->designationService->store($validatedData);
+                return $this->successResponse($data, 'Data Saved Successfully', 200);
+            } catch (\Exception $e) {
+                return $this->errorResponse([], [$e->getMessage()]);
             }
         }
+        return $this->errorResponse("You don't have permission to add designation", [], 401);
 
-    public function update(StoreDesignationRequest $request, $id) {
-        try {
-
-            Log::info('Update Request Data: ', $request->all());
-
-            $userId = $this->checkPermission($request, 94);
-            $validatedData = $request->validated();
-
-            Log::info('Validated Data: ', $validatedData);
-
-            $this->designationService->update($validatedData, $id, $userId);
-            return $this->successResponse();
-        } catch (UnauthorizedException $e) {
-            return $this->errorResponse([], ["You don't have permission to update Designation ...!"], 401);
-        } catch (\Exception $e) {
-            return $this->errorResponse([], $e->getMessage());
-        }
     }
 
-
-
-    public function destroy($id)
+    public function getAllDetails(Request $request, int $id)
     {
-        $designation = Designation::find($id);
-        if (!$designation) {
-            return $this->errorResponse('Designation not found', 404);
-        }
-        $userId = $this->checkPermission($request, 94);
-        $designation->des_deleted_by = $userId;
-        $designation->des_is_deleted = 1;
-        $designation->save();
+        try {
+            $this->authService->getAuthUser($request);
+            return $this->successResponse($this->designationService->getAllDetails($id));
 
-        return response()->json(['message' => 'Designation deleted successfully']);
+        } catch (UnauthorizedException $e){
+            return $this->errorResponse($e->getMessage(),[],401);
+        } catch (\Exception $e) {
+            return $this->errorResponse();
+        }
     }
 
-    private function checkPermission(Request $request, int $privilegeId):int{
-        $response = Http::withHeaders([
-            'Authorization' => $request->header('Authorization')
-        ])->get('http://localhost:8002/api/permission/check/'.$privilegeId);
+    public function update(StoreDesignationRequest $request, $id)
+    {
+        if($this->authService->checkPermission($request, 'edit','human-resource/master-data/manage-cardre/add-new')){
+            try {
+                $userId = $this->authService->getAuthUser($request);
+                $validatedData = $request->validated();
 
-        Log::info('Permission Check Response: ', ['response' => $response->body()]);
-
-        if($response->status() == 200){
-            return $response['data']['id'];
+                $this->designationService->update($validatedData, $id, $userId);
+                return $this->successResponse();
+            } catch (UnauthorizedException $e) {
+                return $this->errorResponse($e->getMessage(), [], 401);
+            } catch (\Exception $e) {
+                return $this->errorResponse([], $e->getMessage());
+            }
         }
+        return $this->errorResponse("You don't have permission to update Designation",[],401);
+    }
 
-        throw new UnauthorizedException('Unauthorized...!');
+    public function destroy(Request $request, $id)
+    {
+        if($this->authService->checkPermission($request, 'remove','human-resource/master-data/manage-cardre/add-new')){
+            try {
+                $userId = $this->authService->getAuthUser($request);
+                $this->designationService->delete($id, $userId);
+                return $this->successResponse();
+            }catch (CRUDException $e){
+                return $this->errorResponse($e->getMessage());
+            }
+        }
+        return $this->errorResponse("You don't have permission to delete designation",[],401);
     }
 }

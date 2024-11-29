@@ -24,6 +24,7 @@ class StoreLeaveTypeRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'lv_code'=>'required|string',
             'lv_name' => 'required|string|max:255',
             'lv_salary_deduct' => 'required',
             'lv_count_working_days' => 'required',

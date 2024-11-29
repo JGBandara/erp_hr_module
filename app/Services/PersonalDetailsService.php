@@ -2,14 +2,18 @@
 
 namespace App\Services;
 
+use App\Exceptions\CRUDException;
+use App\Models\Department;
+use App\Models\Designation;
 use App\Models\PersonalDetails;
+use App\Models\ProfilePic;
 use Illuminate\Support\Facades\Http;
 
 class PersonalDetailsService
 {
     private function createArray(array $arr): array
     {
-        $data = []; // Initialize the $data array
+        $data = [];
 
         if (array_key_exists('personal_file_no', $arr)) {
             $data['personal_file_no'] = $arr['personal_file_no'];
@@ -88,6 +92,20 @@ class PersonalDetailsService
         return PersonalDetails::create($this->createArray($arr));
     }
 
+    public function updateImgKey(int $empId, string $key)
+    {
+        $pic = ProfilePic::where('emp_id', $empId)->firstOr(function () use ($empId, $key) {
+            return ProfilePic::create([
+                'emp_id' => $empId,
+                'img_key' => $key,
+            ]);
+        });
+
+        $pic->img_key = $key;
+        $pic->save();
+    }
+
+
     public function getAllOnlyIdAndFullName(){
          $details = PersonalDetails::all();
          $arr = array();
@@ -101,7 +119,24 @@ class PersonalDetailsService
     }
 
     public function getAllDetails(int $id){
-        return PersonalDetails::find($id);
+        $data = PersonalDetails::find($id);
+        $data['img_key'] = $data->profilePic->img_key;
+
+        $designation = $data->lastDesignation();
+
+        $data['designation'] = [
+            'id'=>$designation->designation_id,
+            'name'=>Designation::find($designation->designation_id)['des_name'],
+        ];
+
+        $department = Department::find($designation->department_id);
+
+        $data['department'] = [
+            'id'=>$department->id,
+            'code'=>$department->dep_code,
+            'name'=>$department->dep_name,
+        ];
+        return $data;
     }
 
     public function update(array $arr, int $id, int $modifiedBy){

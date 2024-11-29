@@ -1,24 +1,27 @@
 <?php
 
+use App\Http\Controllers\API\CoveringOfficerController;
+use App\Http\Controllers\API\DepartmentController;
 use App\Http\Controllers\API\DependentController;
+use App\Http\Controllers\API\DesignationController;
 use App\Http\Controllers\API\DistrictsController;
+use App\Http\Controllers\API\DivisionController;
+use App\Http\Controllers\API\EbExamController;
+use App\Http\Controllers\API\EbExamTypeController;
+use App\Http\Controllers\API\EducationQualificationController;
+use App\Http\Controllers\API\EmployeeCategoryController;
 use App\Http\Controllers\API\EmployeeHistoryController;
+use App\Http\Controllers\API\LeaveRequestController;
+use App\Http\Controllers\API\LeaveTypeController;
 use App\Http\Controllers\API\PersonalDetailsController;
 use App\Http\Controllers\API\QualificationController;
+use App\Http\Controllers\API\ResignTypeController;
+use App\Http\Controllers\API\TrainingProgrammeController;
 use App\Http\Controllers\API\TypeController;
 use App\Http\Controllers\EmployeeTrainingHistoryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\API\DepartmentController;
-use App\Http\Controllers\API\LeaveTypeController;
-use App\Http\Controllers\API\EmployeeCategoryController;
-use App\Http\Controllers\API\DivisionController;
-use App\Http\Controllers\API\DesignationController;
-use App\Http\Controllers\API\EducationQualificationController;
-use App\Http\Controllers\API\EbExamTypeController;
-use App\Http\Controllers\API\EbExamController;
-use App\Http\Controllers\API\TrainingProgrammeController;
-use App\Http\Controllers\API\ResignTypeController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -120,6 +123,7 @@ Route::get('/personalDetails/allForUsers',[PersonalDetailsController::class,'get
 Route::get('/personalDetails/all',[PersonalDetailsController::class,'getAll']);
 Route::get('/personalDetails/{id}',[PersonalDetailsController::class,'getAllDetails']);
 Route::put('/personalDetails/{id}',[PersonalDetailsController::class,'update']);
+Route::put('/setProfilePic',[PersonalDetailsController::class,'addImageKey']);
 
 Route::get('/employeeTrainingHistory/add',[EmployeeTrainingHistoryController::class,'store']);
 
@@ -136,3 +140,11 @@ Route::post('/employee/dependent/add',[DependentController::class,'store']);
 Route::get('/employee/dependent/{id}',[DependentController::class,'getAll']);
 
 Route::get('/hr/types/all', [TypeController::class,'getAll']);
+
+Route::post('/leaveRequest/add',[LeaveRequestController::class,'store']);
+
+Route::get('/employee/coveringOfficers/{id}/{empId}',[CoveringOfficerController::class,'getOfficers']);
+Route::post('/employee/coveringOfficers',[CoveringOfficerController::class,'setOfficer']);
+Route::delete('/employee/coveringOfficers/{empId}/{officerId}',[CoveringOfficerController::class,'removeOfficer']);
+Route::get('/employee/coveringOfficerBelongsTo/{empId}',[CoveringOfficerController::class,'getOfficersBelongTo']);
+

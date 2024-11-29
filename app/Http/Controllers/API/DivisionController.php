@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Exceptions\CRUDException;
 use App\Exceptions\UnauthorizedException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreDivisionRequest;
-use App\Models\Division; 
+use App\Models\Division;
+use App\Services\AuthService;
 use Illuminate\Http\Request;
 use App\Services\DivisionService;
 use App\Traits\ApiResponse;
@@ -14,82 +16,76 @@ use Illuminate\Support\Facades\Log;
 
 class DivisionController extends Controller
 {
-        use ApiResponse;
-        private DivisionService $divisionService;
+    use ApiResponse;
 
-        public function __construct(DivisionService $divisionService){
-            $this->divisionService = $divisionService;
+    private DivisionService $divisionService;
+    private AuthService $authService;
+
+    public function __construct(DivisionService $divisionService, AuthService $authService)
+    {
+        $this->divisionService = $divisionService;
+        $this->authService = $authService;
+    }
+
+    public function index()
+    {
+        return $this->divisionService->getAll();
+    }
+
+    public function store(StoreDivisionRequest $request)
+    {
+
+        if ($this->authService->checkPermission($request, 'add', 'human-resource/master-data/division/add-new')) {
+            $validatedData = $request->validated();
+            try {
+                $data = $this->divisionService->store($validatedData);
+                return $this->successResponse($data, 'Data Saved Successfully', 200);
+            } catch (\Exception $e) {
+                return $this->errorResponse([], [$e->getMessage()]);
+            }
         }
 
-            public function index()
-            {
-                return $this->divisionService->getAll();
-            }
-        
-            public function store(StoreDivisionRequest $request){
+        return $this->errorResponse("You don't have permission to add divisions", [], 401);
+
+    }
+
+    public function getAllDetails(int $id)
+    {
+        try {
+            return $this->successResponse($this->divisionService->getAllDetails($id));
+        } catch (\Exception $e) {
+            return $this->errorResponse();
+        }
+    }
+
+    public function update(StoreDivisionRequest $request, $id)
+    {
+        if ($this->authService->checkPermission($request, 'edit', 'human-resource/master-data/division/add-new')) {
+            try {
                 $validatedData = $request->validated();
-                try {
-              
-                    $data = $this->divisionService->store($validatedData);
-                    return $this->successResponse($data, 'Data Saved Successfully', 200);
-                } catch (\Exception $e) {
-                    return $this->errorResponse([],[$e->getMessage()]);
-                }
+                $userId = $this->authService->getAuthUser($request);
+
+                $this->divisionService->update($validatedData, $id, $userId);
+                return $this->successResponse();
+            } catch (CRUDException $e) {
+                return $this->errorResponse([], $e->getMessage());
             }
-            public function getAllDetails(int $id){
-                try {
-                    return $this->successResponse($this->divisionService->getAllDetails($id));
-                }catch (\Exception $e){
-                    return $this->errorResponse();
-                }
-            }
-            public function update(StoreDivisionRequest $request, $id) {
-                try {
-                    
-                    Log::info('Update Request Data: ', $request->all());
-            
-                    $userId = $this->checkPermission($request, 94);
-                    $validatedData = $request->validated();
-                    
-                    Log::info('Validated Data: ', $validatedData);
-                    
-                    $this->divisionService->update($validatedData, $id, $userId);
-                    return $this->successResponse();
-                } catch (UnauthorizedException $e) {
-                    return $this->errorResponse([], ["You don't have permission to update Division ...!"], 401);
-                } catch (\Exception $e) {
-                    return $this->errorResponse([], $e->getMessage());
-                }
-            }
-            
-    
-           
-        public function destroy($id)
-            {
-                $division = Division::find($id);
-                if (!$division) {
-                    return $this->errorResponse('Division not found', 404);
-                }
-        
-                $division->div_is_deleted = 1;
-                $division->save();
-        
-                return response()->json(['message' => 'Division deleted successfully']);
-            }
-            
-            private function checkPermission(Request $request, int $privilegeId):int{
-                $response = Http::withHeaders([
-                    'Authorization' => $request->header('Authorization')
-                ])->get('http://localhost:8002/api/permission/check/'.$privilegeId);
-                
-                Log::info('Permission Check Response: ', ['response' => $response->body()]);
-                
-                if($response->status() == 200){
-                    return $response['data']['id'];
-                }
-                
-                throw new UnauthorizedException('Unauthorized...!');
-                
         }
+        return $this->errorResponse([], ["You don't have permission to update Division ...!"], 401);
+
+    }
+
+    public function destroy(Request $request, $id)
+    {
+        if ($this->authService->checkPermission($request, 'edit', 'human-resource/master-data/division/add-new')) {
+            try {
+                $this->divisionService->delete($id);
+                return $this->successResponse();
+            }catch (CRUDException $e){
+                return $this->errorResponse($e->getMessage());
+            }
+
         }
-        
+        return $this->errorResponse("You don't have permission to delete division",[],401);
+    }
+}

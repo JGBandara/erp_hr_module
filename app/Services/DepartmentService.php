@@ -17,6 +17,7 @@ class DepartmentService
             'dep_status' => $validatedData['active'],
         ];
         $department = Department::create($data);
+
         return $department;
     }
     public function update(int $id, array $validatedData){
@@ -40,7 +41,7 @@ class DepartmentService
 
     }
     public function getAll(){
-        return Department::where('dep_is_deleted', 0)->select('dep_code', 'dep_name', 'dep_remark', 'dep_status')->get();
+        return Department::where('dep_is_deleted', 0)->select('id','dep_code', 'dep_name', 'dep_remark', 'dep_status')->get();
     }
 
     public function delete($id){

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\CRUDException;
 use App\Models\Division;
 use Illuminate\Support\Facades\Http;
 
@@ -57,6 +58,10 @@ class DivisionService
     public function update(array $arr, int $id, int $modifiedBy){
         $division = Division::find($id);
 
+        if(!$division){
+            throw new CRUDException("Division not found");
+        }
+
         if (array_key_exists('div_code', $arr)) {
             $division->div_code = $arr['div_code'];
         }
@@ -86,6 +91,15 @@ class DivisionService
 
         $division->save();
 
+    }
+
+    public function delete($id){
+        $division = Division::find($id);
+        if(!$division){
+            throw new CRUDException("Division not found");
+        }
+        $division->div_is_deleted = 1;
+        $division->save();
     }
 
 

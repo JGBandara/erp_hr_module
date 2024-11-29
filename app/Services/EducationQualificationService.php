@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\CRUDException;
 use App\Models\educationQualification;
 use Illuminate\Support\Facades\Http;
 
@@ -11,7 +12,7 @@ class EducationQualificationService
     {
         $data = [];
 
-        
+
         if (array_key_exists('qua_name', $arr)) {
             $data['qua_name'] = $arr['qua_name'];
         }
@@ -46,7 +47,11 @@ class EducationQualificationService
     public function update(array $arr, int $id, int $modifiedBy){
         $educationQualification = educationQualification::find($id);
 
-        
+        if(!$educationQualification){
+            throw new CRUDException("Education Qualification not found");
+        }
+
+
         if (array_key_exists('qua_name', $arr)) {
             $educationQualification->qua_name = $arr['qua_name'];
         }
@@ -59,11 +64,20 @@ class EducationQualificationService
             $educationQualification->qua_status = $arr['qua_status'];
         }
 
-
         $educationQualification->qua_modified_by = $modifiedBy;
 
         $educationQualification->save();
 
+    }
+
+    public function delete($id, $userId){
+        $educationQualification = EducationQualification::find($id);
+        if (!$educationQualification) {
+            throw new CRUDException('Qualification not found');
+        }
+        $educationQualification->qua_deleted_by = $userId;
+        $educationQualification->qua_is_deleted = 1;
+        $educationQualification->save();
     }
 
 

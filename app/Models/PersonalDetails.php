@@ -31,6 +31,9 @@ class PersonalDetails extends Model
     public function history(){
         return $this->hasMany(EmployeeHistory::class,'emp_id','id');
     }
+    public function lastDesignation(){
+        return $this->history()->latest('date_time')->first();
+    }
     public function olResults(){
         return $this->hasMany(OLExamination::class,'emp_id','id');
     }
@@ -42,5 +45,13 @@ class PersonalDetails extends Model
     }
     public function dependents(){
         return $this->hasMany(Dependent::class,'emp_id','id');
+    }
+    public function profilePic(){
+        return $this->hasOne(ProfilePic::class,'emp_id','id')->withDefault([
+            'url'=>null
+        ]);
+    }
+    public function coveringOfficers(){
+        return $this->hasMany(CoveringOfficer::class,'emp_id','id')->where('is_deleted','=',0);
     }
 }

@@ -10,8 +10,10 @@ class LeaveTypeService
     private function createArray(array $arr): array
     {
         $data = [];
+        if (array_key_exists('lv_code', $arr)) {
+            $data['lv_code'] = $arr['lv_code'];
+        }
 
-        
         if (array_key_exists('lv_name', $arr)) {
             $data['lv_name'] = $arr['lv_name'];
         }
@@ -64,7 +66,7 @@ class LeaveTypeService
     public function update(array $arr, int $id, int $modifiedBy){
         $LeaveType = LeaveType::find($id);
 
-        
+
         if (array_key_exists('lv_name', $arr)) {
             $LeaveType->lv_name = $arr['lv_name'];
         }

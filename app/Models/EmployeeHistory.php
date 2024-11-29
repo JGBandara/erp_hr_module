@@ -19,4 +19,7 @@ class EmployeeHistory extends Model
         'grade',
         'workstation_id',
     ];
+    public function employee(){
+        return $this->belongsTo(PersonalDetails::class,'emp_id','id');
+    }
 }
