@@ -54,4 +54,7 @@ class PersonalDetails extends Model
     public function coveringOfficers(){
         return $this->hasMany(CoveringOfficer::class,'emp_id','id')->where('is_deleted','=',0);
     }
+    public function movements(){
+        return $this->hasMany(Movement::class,'emp_id','id');
+    }
 }

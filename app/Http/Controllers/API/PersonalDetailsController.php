@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Exceptions\CRUDException;
 use App\Exceptions\UnauthorizedException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePersonalDetailsRequest;
@@ -81,5 +82,12 @@ class PersonalDetailsController extends Controller
         }
         return $this->errorResponse([],["You don't have permission to update personal details"],401);
 
+    }
+    public function getEmployeeByPersonalFileNo(string $no, Request $request){
+        try {
+            return $this->successResponse($this->personalDetailsService->getDetailsByEmpNo($no));
+        }catch (CRUDException $e){
+            return $this->errorResponse($e->getMessage());
+        }
     }
 }

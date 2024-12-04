@@ -13,6 +13,7 @@ use App\Http\Controllers\API\EmployeeCategoryController;
 use App\Http\Controllers\API\EmployeeHistoryController;
 use App\Http\Controllers\API\LeaveRequestController;
 use App\Http\Controllers\API\LeaveTypeController;
+use App\Http\Controllers\API\MovementController;
 use App\Http\Controllers\API\PersonalDetailsController;
 use App\Http\Controllers\API\QualificationController;
 use App\Http\Controllers\API\ResignTypeController;
@@ -124,6 +125,7 @@ Route::get('/personalDetails/all',[PersonalDetailsController::class,'getAll']);
 Route::get('/personalDetails/{id}',[PersonalDetailsController::class,'getAllDetails']);
 Route::put('/personalDetails/{id}',[PersonalDetailsController::class,'update']);
 Route::put('/setProfilePic',[PersonalDetailsController::class,'addImageKey']);
+Route::get('/personalDetails/getEmployeeByPPNO/{no}',[PersonalDetailsController::class,'getEmployeeByPersonalFileNo']);
 
 Route::get('/employeeTrainingHistory/add',[EmployeeTrainingHistoryController::class,'store']);
 
@@ -147,4 +149,7 @@ Route::get('/employee/coveringOfficers/{id}/{empId}',[CoveringOfficerController:
 Route::post('/employee/coveringOfficers',[CoveringOfficerController::class,'setOfficer']);
 Route::delete('/employee/coveringOfficers/{empId}/{officerId}',[CoveringOfficerController::class,'removeOfficer']);
 Route::get('/employee/coveringOfficerBelongsTo/{empId}',[CoveringOfficerController::class,'getOfficersBelongTo']);
+
+Route::post('/employee/movement/add',[MovementController::class,'store']);
+Route::get('/employee/movements/{id}',[MovementController::class,'getByEmpId']);
 

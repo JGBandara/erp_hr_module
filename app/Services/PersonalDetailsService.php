@@ -220,5 +220,11 @@ class PersonalDetailsService
         return PersonalDetails::find($empId)->history;
     }
 
+    public function getDetailsByEmpNo(string $no){
+        return PersonalDetails::where('personal_file_no',$no)->firstOr(function(){
+            throw new CRUDException('Invalid Number');
+        });
+    }
+
 
 }
