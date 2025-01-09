@@ -25,7 +25,7 @@ class LeaveTypeController extends Controller
 
     public function index()
     {
-        return $this->leaveTypeService->getAll();
+        return $this->successResponse($this->leaveTypeService->getAll());
     }
 
     public function store(StoreLeaveTypeRequest $request)

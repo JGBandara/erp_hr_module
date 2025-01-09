@@ -7,6 +7,8 @@ use App\Exceptions\UnauthorizedException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePersonalDetailsRequest;
 use App\Http\Requests\UpdateProfilePicRequest;
+use App\Models\ForApproval;
+use App\Models\LeaveRequest;
 use App\Models\PersonalDetails;
 use App\Services\AuthService;
 use App\Services\PersonalDetailsService;
@@ -89,5 +91,10 @@ class PersonalDetailsController extends Controller
         }catch (CRUDException $e){
             return $this->errorResponse($e->getMessage());
         }
+    }
+    public function getAllAssignedEmployeesForLeaveApproval(Request $request){
+        $empId = $this->authService->getAuthUser($request)['emp_id'];
+
+        return $this->successResponse($this->personalDetailsService->getAllAssignedForApproval($empId));
     }
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\API\ApprovalController;
 use App\Http\Controllers\API\CoveringOfficerController;
 use App\Http\Controllers\API\DepartmentController;
 use App\Http\Controllers\API\DependentController;
@@ -11,6 +12,8 @@ use App\Http\Controllers\API\EbExamTypeController;
 use App\Http\Controllers\API\EducationQualificationController;
 use App\Http\Controllers\API\EmployeeCategoryController;
 use App\Http\Controllers\API\EmployeeHistoryController;
+use App\Http\Controllers\API\LeaveApprovalOfficerController;
+use App\Http\Controllers\API\LeaveBalanceController;
 use App\Http\Controllers\API\LeaveRequestController;
 use App\Http\Controllers\API\LeaveTypeController;
 use App\Http\Controllers\API\MovementController;
@@ -119,6 +122,8 @@ Route::post('/leaveType', [LeaveTypeController::class, 'store']);
 Route::put('/leaveType/{id}', [LeaveTypeController::class, 'update']);
 Route::delete('/leaveType/{id}', [LeaveTypeController::class, 'destroy']);
 
+Route::get('/personalDetails/getAssignedEmployees',[PersonalDetailsController::class,'getAllAssignedEmployeesForLeaveApproval']);
+
 Route::post('/personalDetails/add',[PersonalDetailsController::class,'store']);
 Route::get('/personalDetails/allForUsers',[PersonalDetailsController::class,'getAllForUsers']);
 Route::get('/personalDetails/all',[PersonalDetailsController::class,'getAll']);
@@ -144,6 +149,10 @@ Route::get('/employee/dependent/{id}',[DependentController::class,'getAll']);
 Route::get('/hr/types/all', [TypeController::class,'getAll']);
 
 Route::post('/leaveRequest/add',[LeaveRequestController::class,'store']);
+Route::put('/leaveRequest/update',[LeaveRequestController::class,'update']);
+Route::post('/leaveRequest/attachments/add',[LeaveRequestController::class,'saveAttachments']);
+Route::get('/leaveRequest/all',[LeaveRequestController::class,'getAll']);
+Route::get('/leaveRequest/get/{id}',[LeaveRequestController::class,'getById']);
 
 Route::get('/employee/coveringOfficers/{id}/{empId}',[CoveringOfficerController::class,'getOfficers']);
 Route::post('/employee/coveringOfficers',[CoveringOfficerController::class,'setOfficer']);
@@ -152,4 +161,14 @@ Route::get('/employee/coveringOfficerBelongsTo/{empId}',[CoveringOfficerControll
 
 Route::post('/employee/movement/add',[MovementController::class,'store']);
 Route::get('/employee/movements/{id}',[MovementController::class,'getByEmpId']);
+
+Route::post('/leaveApproveOfficer/add',[LeaveApprovalOfficerController::class,'store']);
+Route::get('/leaveApproveOfficer/get/{empId}/{level}',[LeaveApprovalOfficerController::class,'getOfficers']);
+
+Route::post('/approve/add',[ApprovalController::class,'store']);
+Route::post('/approve',[ApprovalController::class,'approve']);
+Route::get('/approve/previous/{requestId}/{typeId}',[ApprovalController::class,'getPreviousApprovals']);
+
+Route::post('/leaveBalance/add',[LeaveBalanceController::class,'add']);
+Route::get('/leaveBalance/getAll/{empId}',[LeaveBalanceController::class,'getLeaveBalances']);
 

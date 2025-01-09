@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Exceptions\CRUDException;
+use App\Exceptions\ExceedLeaveLimitException;
+use App\Exceptions\IllegalArgumentException;
 use App\Exceptions\UnauthorizedException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreLeaveRequest;
@@ -30,9 +31,27 @@ class LeaveRequestController extends Controller
             return $this->successResponse($this->leaveRequestService->store($validatedData));
         }catch (UnauthorizedException $e){
             return $this->errorResponse($e->getMessage());
-        }catch (CRUDException $e){
+        }catch (ExceedLeaveLimitException $e){
+            return $this->errorResponse('', $e->getMessage(),403);
+        }catch (IllegalArgumentException $e){
             return $this->errorResponse($e->getMessage());
-
         }
+    }
+    public function saveAttachments(Request $request){
+        $this->leaveRequestService->saveAttachments($request->all()['paths'], $request->all()['request_id']);
+    }
+    public function update(Request $request){
+        try {
+            $this->leaveRequestService->update($request->all());
+            return $this->successResponse();
+        } catch (ExceedLeaveLimitException | UnauthorizedException $e) {
+            return $this->errorResponse('', $e->getMessage(), 403);
+        }
+    }
+    public function getAll(){
+        return $this->successResponse($this->leaveRequestService->getAll());
+    }
+    public function getById(Request $request, $id){
+        return $this->successResponse($this->leaveRequestService->getById($id));
     }
 }

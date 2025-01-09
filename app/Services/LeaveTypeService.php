@@ -54,7 +54,7 @@ class LeaveTypeService
          $details = LeaveType::all();
          $arr = array();
          foreach ($details as $type){
-             array_push($arr, ['id'=>$type->id, 'lv_name'=>$type->lv_name]);
+             array_push($arr, ['id'=>$type->id, 'lv_name'=>$type->lv_name, 'count'=>$type->lv_default_count]);
          }
          return $arr;
     }

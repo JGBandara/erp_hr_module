@@ -26,4 +26,20 @@ class LeaveRequest extends Model
         'deleted_by',
         'last_modified_by',
     ];
+    public function attachments(){
+        return $this->hasMany(LeaveRequestAttachments::class,'request_id','id');
+    }
+    public function employee()
+    {
+        return $this->belongsTo(PersonalDetails::class, 'emp_id', 'id');
+    }
+    public function approvals()
+    {
+        return $this->hasMany(ForApproval::class, 'request_id', 'id')
+            ->where('is_pending', true);
+    }
+    public function approvalOffices()
+    {
+        return $this->hasMany(LeaveApprovalOfficer::class, 'emp_id', 'emp_id');
+    }
 }

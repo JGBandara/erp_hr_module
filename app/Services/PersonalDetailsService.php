@@ -5,9 +5,10 @@ namespace App\Services;
 use App\Exceptions\CRUDException;
 use App\Models\Department;
 use App\Models\Designation;
+use App\Models\LeaveRequest;
+use App\Models\LeaveType;
 use App\Models\PersonalDetails;
 use App\Models\ProfilePic;
-use Illuminate\Support\Facades\Http;
 
 class PersonalDetailsService
 {
@@ -88,7 +89,9 @@ class PersonalDetailsService
 
         return $data;
     }
-    public function store(array $arr): PersonalDetails{
+
+    public function store(array $arr): PersonalDetails
+    {
         return PersonalDetails::create($this->createArray($arr));
     }
 
@@ -106,40 +109,45 @@ class PersonalDetailsService
     }
 
 
-    public function getAllOnlyIdAndFullName(){
-         $details = PersonalDetails::all();
-         $arr = array();
-         foreach ($details as $item){
-             array_push($arr, ['id'=>$item->id, 'name'=>$item->full_name]);
-         }
-         return $arr;
+    public function getAllOnlyIdAndFullName()
+    {
+        $details = PersonalDetails::all();
+        $arr = array();
+        foreach ($details as $item) {
+            array_push($arr, ['id' => $item->id, 'name' => $item->full_name]);
+        }
+        return $arr;
     }
-    public function getAll(){
+
+    public function getAll()
+    {
         return PersonalDetails::all();
     }
 
-    public function getAllDetails(int $id){
+    public function getAllDetails(int $id)
+    {
         $data = PersonalDetails::find($id);
         $data['img_key'] = $data->profilePic->img_key;
 
         $designation = $data->lastDesignation();
 
         $data['designation'] = [
-            'id'=>$designation->designation_id,
-            'name'=>Designation::find($designation->designation_id)['des_name'],
+            'id' => $designation ? $designation->designation_id : null,
+            'name' => $designation ? Designation::find($designation->designation_id)['des_name'] : null,
         ];
 
-        $department = Department::find($designation->department_id);
+        $department = $designation ? Department::find($designation->department_id) : null;
 
         $data['department'] = [
-            'id'=>$department->id,
-            'code'=>$department->dep_code,
-            'name'=>$department->dep_name,
+            'id' => $department ? $department->id : null,
+            'code' => $department ? $department->dep_code : null,
+            'name' => $department ? $department->dep_name : null,
         ];
         return $data;
     }
 
-    public function update(array $arr, int $id, int $modifiedBy){
+    public function update(array $arr, int $id, int $modifiedBy)
+    {
         $personalDetails = PersonalDetails::find($id);
 
         if (array_key_exists('personal_file_no', $arr)) {
@@ -216,15 +224,83 @@ class PersonalDetailsService
 
     }
 
-    public function getAllHistory(int $empId){
+    public function getAllHistory(int $empId)
+    {
         return PersonalDetails::find($empId)->history;
     }
 
-    public function getDetailsByEmpNo(string $no){
-        return PersonalDetails::where('personal_file_no',$no)->firstOr(function(){
+    public function getDetailsByEmpNo(string $no)
+    {
+        return PersonalDetails::where('personal_file_no', $no)->firstOr(function () {
             throw new CRUDException('Invalid Number');
         });
     }
 
+    public function getAllAssignedForApproval($id)
+    {
+        $array = [];
+        foreach (PersonalDetails::find($id)->assignedEmployees as $item) {
+            foreach ($this->getRequests($item['emp_id']) as $request) {
+                $array[] = $request;
+            }
+        }
+        $approvals = [];
+        foreach ($array as $request) {
+            foreach ($this->getApprovals($request['id']) as $approval) {
+                if($this->checkLevel($approval['level'], $request['emp_id'], $id)){
+                    $approvals[] = $this->createApprovalObject($approval);
+                }
+            }
+        }
+        return $approvals;
+    }
 
+    private function createApprovalObject($approval){
+        $approval['request']=LeaveRequest::find($approval['request_id']);
+        $approval['employee'] = PersonalDetails::find($approval['request']['emp_id']);
+        $approval['request']['leave_type']=LeaveType::find($approval['request']['leave_type_id']);
+        return $approval;
+    }
+
+    public function getRequests($id)
+    {
+        return PersonalDetails::find($id)->leaveRequests;
+    }
+
+    public function getApprovals($requestId)
+    {
+        return LeaveRequest::find($requestId)->approvals;
+    }
+
+    private function checkLevel($level, $empId, $officerId)
+    {
+        foreach (PersonalDetails::find($empId)->approvalOfficersByLevel($level) as $officer) {
+            if ($officer['officer_id'] == $officerId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private function putInARow(array $data)
+    {
+        return $this->createSingleArray($data, []);
+    }
+
+    private function createSingleArray(array $data, array $new)
+    {
+        foreach ($data as $item) {
+            if (is_array($item)) {
+                $new = $this->createSingleArray($item, $new);
+            } else {
+                $new[] = $item;
+            }
+        }
+        return $new;
+    }
+
+    private function removeDuplicates(array $array, string $key = null)
+    {
+        return collect($array)->unique($key)->values()->all();
+    }
 }
