@@ -29,7 +29,7 @@ class DivisionController extends Controller
 
     public function index()
     {
-        return $this->divisionService->getAll();
+        return $this->successResponse($this->divisionService->getAll());
     }
 
     public function store(StoreDivisionRequest $request)

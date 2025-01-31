@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Exceptions\ExceedLeaveLimitException;
 use App\Exceptions\IllegalArgumentException;
 use App\Exceptions\UnauthorizedException;
+use App\Mail\CoveringOfficerActionMail;
 use App\Models\ForApproval;
 use App\Models\LeaveBalance;
 use App\Models\LeaveRequest;
@@ -12,6 +13,7 @@ use App\Models\LeaveRequestAttachments;
 use App\Models\LeaveType;
 use App\Models\PersonalDetails;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 
 class LeaveRequestService
 {
@@ -22,21 +24,37 @@ class LeaveRequestService
         $this->approvalService = $approvalService;
     }
 
+    /**
+     * @throws IllegalArgumentException
+     * @throws ExceedLeaveLimitException
+     */
     public function store(array $data)
     {
-        if ($this->confirmDaysCount($data['date_from'], $data['date_to']) == $data['no_of_days']) {
-            if ($this->checkAvailability($data['emp_id'], $data['leave_type_id'], $data['year'], $data['no_of_days'])) {
-                $data['covering_officer_id'] = 1;
-                $leaveReq = LeaveRequest::create($data);
-                $this->approvalService->store([
-                    'request_id' => $leaveReq->id,
-                    'type_id' => 1
-                ]);
-                return $leaveReq;
+        if($this->isCoveringOfficerAvailbale($data['date_from'], $data['date_to'],$data['covering_officer_id'])){
+
+            if ($this->confirmDaysCount($data['date_from'], $data['date_to']) == $data['no_of_days']) {
+
+                if ($this->checkAvailability($data['emp_id'], $data['leave_type_id'], $data['year'], $data['no_of_days'])) {
+
+
+                    $data['request_no'] = $this->genarateLeaveRequestNumber();
+
+                    $leaveReq = LeaveRequest::create($data);
+                    if($data['covering_officer_id'] != 0){
+                        $this->sendMailToCoveringOfficer($leaveReq['id']);
+                    }else{
+                        $this->approvalService->store([
+                            'request_id' => $leaveReq->id,
+                            'type_id' => 1
+                        ]);
+                    }
+                    return $leaveReq;
+                }
+                throw new ExceedLeaveLimitException('Leave Limit Exceeded.');
             }
-            throw new ExceedLeaveLimitException('Leave Limit Exceeded.');
+            throw new IllegalArgumentException('Invalid No of days.');
         }
-        throw new IllegalArgumentException('Invalid No of days.');
+        throw new IllegalArgumentException('Covering officer not available');
     }
 
     public function checkAvailability(int $empId, int $leaveTypeId, int $year, $noOfDays): bool
@@ -85,7 +103,7 @@ class LeaveRequestService
         return $response['data'];
     }
 
-    public function saveAttachments(array $data, int $requestId)
+    public function saveAttachments(array $data, int $requestId): void
     {
         foreach ($data as $path) {
             LeaveRequestAttachments::create([
@@ -95,7 +113,11 @@ class LeaveRequestService
         }
     }
 
-    public function update(array $data)
+    /**
+     * @throws ExceedLeaveLimitException
+     * @throws UnauthorizedException
+     */
+    public function update(array $data): void
     {
         $request_id = $data['id'];
         $approval = ForApproval::where([
@@ -121,7 +143,7 @@ class LeaveRequestService
         $request->save();
     }
 
-    public function getAll()
+    public function getAll(): \Illuminate\Database\Eloquent\Collection
     {
         $requests = LeaveRequest::all(['id', 'request_no', 'emp_id', 'created_at']);
         foreach ($requests as $request) {
@@ -135,5 +157,75 @@ class LeaveRequestService
     public function getById(int $id)
     {
         return LeaveRequest::find($id);
+    }
+    private function isCoveringOfficerAvailbale($startDate, $endDate, $officerId){
+        $requests = LeaveRequest::where([
+            'emp_id'=>$officerId,
+        ])->get();
+
+        $finalList = [];
+
+        foreach ($requests as $request){
+            $rs = ForApproval::where([
+                'request_type_id'=>1,
+                'request_id'=>$request['id'],
+                'is_pending'=>1,
+            ])->first();
+            if($rs){
+                $finalList[] = $request;
+            }
+        }
+
+        $isAvailable = true;
+
+        foreach ($finalList as $each){
+            foreach ($this->getDuration($each['date_from'], $each['date_to']) as $reqDate){
+                foreach ($this->getDuration($startDate, $endDate) as $selfReq){
+                    if($selfReq == $reqDate){
+                        $isAvailable = false;
+                    }
+                }
+            }
+
+        }
+        return $isAvailable;
+
+    }
+    private function getDuration($from, $to): array
+    {
+        $fromDate = new \DateTime($from);
+        $toDate = new \DateTime($to);
+        $interval = new \DateInterval('P1D');
+        $period = new \DatePeriod($fromDate, $interval, $toDate);
+        $dates = [];
+        foreach ($period as $date) {
+            $formattedDate = $date->format("Y-m-d");
+            $dates[] = $formattedDate;
+        }
+        return $dates;
+    }
+    private function sendMailToCoveringOfficer($requestId): void
+    {
+        $data = $this->getById($requestId);
+        $employee = PersonalDetails::find($data['emp_id']);
+        $coveringOfficer = PersonalDetails::find($data['covering_officer_id']);
+        $leaveDetails = LeaveType::find($data['leave_type_id']);
+        $leaveData = [
+            'leave_id'          => $requestId,
+            'employee_name'     => $employee['full_name'],
+            'covering_officer'  => $coveringOfficer['full_name'],
+            'email'             => $coveringOfficer['personal_email'],
+            'subject'           => 'Assigned as Leave Covering Officer',
+            'message'           => "You have been assigned as the covering officer for {$employee['full_name']} during their leave.",
+            'leave_type'        => $leaveDetails['lv_name'],
+            'start_date'        => $data['date_from'],
+            'end_date'          => $data['date_to'],
+            'covering_officer_id' => $coveringOfficer['id'],
+        ];
+        Mail::to($leaveData['email'])->queue(new CoveringOfficerActionMail($leaveData));
+    }
+    private function genarateLeaveRequestNumber(){
+        $max = LeaveRequest::max('id');
+        return 'REQ/LEV/'.(++$max);
     }
 }

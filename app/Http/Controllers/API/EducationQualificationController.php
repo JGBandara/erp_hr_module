@@ -56,7 +56,7 @@ class EducationQualificationController extends Controller
     {
         if($this->authService->checkPermission($request, 'edit','human-resource/master-data/education-qualifications/manage')){
             try {
-                $userId = $this->authService->getAuthUser($request);
+                $userId = $this->authService->getAuthUser($request)['id'];
                 $validatedData = $request->validated();
                 $this->educationQualificationService->update($validatedData, $id, $userId);
                 return $this->successResponse();
@@ -73,7 +73,7 @@ class EducationQualificationController extends Controller
     {
         if($this->authService->checkPermission($request, 'remove','human-resource/master-data/education-qualifications/manage')){
             try {
-                $userId = $this->authService->getAuthUser($request);
+                $userId = $this->authService->getAuthUser($request)['id'];
                 $this->educationQualificationService->delete($id, $userId);
                 return $this->successResponse();
             }catch (CRUDException $e){

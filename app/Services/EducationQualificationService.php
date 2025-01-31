@@ -32,10 +32,10 @@ class EducationQualificationService
     }
 
     public function getAll(){
-         $details = educationQualification::all();
+         $details = educationQualification::where('qua_is_deleted',0)->get();
          $arr = array();
          foreach ($details as $type){
-             array_push($arr, ['id'=>$type->id, 'qua_name'=>$type->qua_name]);
+             array_push($arr, ['id'=>$type->id, 'qua_name'=>$type->qua_name, 'qua_status'=>$type->qua_status]);
          }
          return $arr;
     }

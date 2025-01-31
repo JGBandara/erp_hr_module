@@ -23,11 +23,12 @@ class LeaveRequestController extends Controller
         $this->authService = $authService;
     }
     public function store(StoreLeaveRequest $request){
-
         try {
             $data = $this->authService->getAuthUser($request);
             $validatedData = $request->validated();
             $validatedData['created_by'] = $data['id'];
+            $validatedData['covering_officer_id'] = $validatedData['covering_officer_id'] ?? 0;
+
             return $this->successResponse($this->leaveRequestService->store($validatedData));
         }catch (UnauthorizedException $e){
             return $this->errorResponse($e->getMessage());

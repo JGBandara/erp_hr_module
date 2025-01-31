@@ -16,7 +16,7 @@ class StoreLeaveRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'request_no'=>'',
+//            'request_no'=>'',
             'year' => 'required|digits:4|integer|min:2000|max:' . date('Y'),
             'emp_id' => 'required|integer|exists:hr_emp_personal_details,id',
             'leave_type_id' => 'required|integer|exists:hr_mst_leave_type,id',
@@ -26,7 +26,7 @@ class StoreLeaveRequest extends FormRequest
             'purpose' => 'required|string|max:255',
             'remark' => 'nullable|string|max:255',
             'location_id' => 'required|integer',
-            'covering_officer_id' => 'integer|exists:employees,id',
+            'covering_officer_id' => 'integer|exists:hr_emp_personal_details,id',
 
         ];
     }

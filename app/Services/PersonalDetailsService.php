@@ -9,6 +9,7 @@ use App\Models\LeaveRequest;
 use App\Models\LeaveType;
 use App\Models\PersonalDetails;
 use App\Models\ProfilePic;
+use Illuminate\Support\Facades\Http;
 
 class PersonalDetailsService
 {
@@ -111,7 +112,15 @@ class PersonalDetailsService
 
     public function getAllOnlyIdAndFullName()
     {
-        $details = PersonalDetails::all();
+        $response = Http::get('http://localhost:8001/api/user/all');
+        $arr = [];
+        if($response['data']){
+            foreach ($response['data'] as $user){
+                $arr[] = $user['emp_id'];
+            }
+        }
+
+        $details = PersonalDetails::whereNotIn('id',$arr)->get();
         $arr = array();
         foreach ($details as $item) {
             array_push($arr, ['id' => $item->id, 'name' => $item->full_name]);
@@ -220,7 +229,7 @@ class PersonalDetailsService
 
         $personalDetails->modified_by = $modifiedBy;
 
-        $personalDetails->save();
+        return $personalDetails->save();
 
     }
 

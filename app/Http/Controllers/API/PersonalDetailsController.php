@@ -7,14 +7,11 @@ use App\Exceptions\UnauthorizedException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePersonalDetailsRequest;
 use App\Http\Requests\UpdateProfilePicRequest;
-use App\Models\ForApproval;
-use App\Models\LeaveRequest;
-use App\Models\PersonalDetails;
 use App\Services\AuthService;
 use App\Services\PersonalDetailsService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
+use function Laravel\Prompts\error;
 
 class PersonalDetailsController extends Controller
 {
@@ -76,8 +73,8 @@ class PersonalDetailsController extends Controller
             try{
                 $userId =  $this->authService->getAuthUser($request);
                 $validatedData = $request->validated();
-                $this->personalDetailsService->update($validatedData, $id, $userId);
-                return $this->successResponse();
+                $data = $this->personalDetailsService->update($validatedData, $id, (int)$userId);
+                return $this->successResponse($data);
             }catch (\Exception $e){
                 return $this->errorResponse([],$e->getMessage());
             }
@@ -96,5 +93,14 @@ class PersonalDetailsController extends Controller
         $empId = $this->authService->getAuthUser($request)['emp_id'];
 
         return $this->successResponse($this->personalDetailsService->getAllAssignedForApproval($empId));
+    }
+    public function getSelf(Request $request){
+        try {
+            $user = $this->authService->getAuthUser($request);
+            $empId = $user['emp_id'];
+            return $this->successResponse($this->personalDetailsService->getAllDetails($empId));
+        }catch (UnauthorizedException $e){
+            return $this->errorResponse($e->getMessage(),[],401);
+        }
     }
 }

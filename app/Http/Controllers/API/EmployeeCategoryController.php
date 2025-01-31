@@ -57,8 +57,7 @@ class EmployeeCategoryController extends Controller
         if($this->authService->checkPermission($request, 'edit', 'human-resource/master-data/employee-category/add-new')){
             $validatedData = $request->validated();
             try {
-                Log::info('Update Request Data: ', $request->all());
-                $userId = $this->authService->getAuthUser($request);
+                $userId = $this->authService->getAuthUser($request)['id'];
 
                 $this->EmployeeCategoryService->update($validatedData, $id, $userId);
                 return $this->successResponse();
@@ -72,12 +71,13 @@ class EmployeeCategoryController extends Controller
 
     public function destroy(Request $request, $id)
     {
+
         if($this->authService->checkPermission($request, 'remove', 'human-resource/master-data/employee-category/add-new')){
             try {
-                $userId = $this->authService->getAuthUser($request);
+                $userId = $this->authService->getAuthUser($request)['id'];
                 $data = ['emp_cat_is_deleted' => 1];
-                $this->EmployeeCategoryService->update($data, $id, $userId);
-                return $this->successResponse();
+
+                return $this->successResponse($this->EmployeeCategoryService->update($data, $id, $userId));
             }catch (CRUDException $e){
                 return $this->errorResponse('Invalid category', $e->getMessage());
             }

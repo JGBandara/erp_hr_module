@@ -63,10 +63,10 @@ Route::put('/division/{id}', [DivisionController::class, 'update']);
 Route::delete('/division/{id}', [DivisionController::class, 'destroy']);
 
 Route::get('/category/getAll', [EmployeeCategoryController::class, 'index']);
+Route::delete('/category/{id}', [EmployeeCategoryController::class, 'destroy']);
 Route::get('/category/{id}', [EmployeeCategoryController::class, 'getAllDetails']);
 Route::post('/category', [EmployeeCategoryController::class, 'store']);
 Route::put('/category/{id}', [EmployeeCategoryController::class, 'update']);
-Route::delete('/category/{id}', [EmployeeCategoryController::class, 'destroy']);
 
 
 Route::get('/designation/getAll', [DesignationController::class, 'index']);
@@ -77,8 +77,6 @@ Route::delete('/designation/{id}', [DesignationController::class, 'destroy']);
 
 Route::get('/qualification/getAll', [EducationQualificationController::class, 'index']);
 Route::get('/qualification/{id}', [EducationQualificationController::class, 'getAllDetails']);
-Route::get('/qualification/getAll', [EducationQualificationController::class, 'index']);
-Route::get('/qualification/{id}', [EducationQualificationController::class, 'getA']);
 Route::post('/qualification', [EducationQualificationController::class, 'store']);
 Route::put('/qualification/{id}', [EducationQualificationController::class, 'update']);
 Route::delete('/qualification/{id}', [EducationQualificationController::class, 'destroy']);
@@ -131,6 +129,7 @@ Route::get('/personalDetails/{id}',[PersonalDetailsController::class,'getAllDeta
 Route::put('/personalDetails/{id}',[PersonalDetailsController::class,'update']);
 Route::put('/setProfilePic',[PersonalDetailsController::class,'addImageKey']);
 Route::get('/personalDetails/getEmployeeByPPNO/{no}',[PersonalDetailsController::class,'getEmployeeByPersonalFileNo']);
+Route::get('/personalDetails/get/self',[PersonalDetailsController::class,'getSelf']);
 
 Route::get('/employeeTrainingHistory/add',[EmployeeTrainingHistoryController::class,'store']);
 
@@ -171,4 +170,8 @@ Route::get('/approve/previous/{requestId}/{typeId}',[ApprovalController::class,'
 
 Route::post('/leaveBalance/add',[LeaveBalanceController::class,'add']);
 Route::get('/leaveBalance/getAll/{empId}',[LeaveBalanceController::class,'getLeaveBalances']);
+Route::get('/leaveBalance/get/self',[LeaveBalanceController::class,'getSelf']);
 
+Route::post('/mail/request-mail',[CoveringOfficerController::class,'sendRequest']);
+
+Route::get('/covering-officer/request/accept/{empId}',[CoveringOfficerController::class,'accept']);

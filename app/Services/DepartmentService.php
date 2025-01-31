@@ -35,7 +35,7 @@ class DepartmentService
             $department->save();
             return $department;
         } catch (\Exception $e) {
-            Log::error('Error updating department', ['error' => $e->getMessage()]);
+//            Log::error('Error updating department', ['error' => $e->getMessage()]);
             throw new CRUDException("Update not successful");
         }
 

@@ -52,9 +52,10 @@ class EmployeeCategoryService
         return EmployeeCategory::find($id);
     }
 
-    public function update(array $arr, int $id, int $modifiedBy){
+    public function update(array $arr, $id, $modifiedBy){
 
         $category = EmployeeCategory::find($id);
+
 
         if (!$category) {
             throw new CRUDException('Category not found');
@@ -83,7 +84,9 @@ class EmployeeCategoryService
         if (array_key_exists('emp_cat_status', $arr)) {
             $category->emp_cat_status = $arr['emp_cat_status'];
         }
-
+        if(array_key_exists('emp_cat_is_deleted',$arr)){
+            $category->emp_cat_is_deleted = $arr['emp_cat_is_deleted'];
+        }
 
         $category->emp_cat_modified_by = $modifiedBy;
         $category->save();

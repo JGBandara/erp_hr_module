@@ -10,7 +10,7 @@ use App\Services\AuthService;
 use App\Services\DepartmentService;
 use App\Http\Controllers\Controller;
 use App\Models\Department;
-use App\Services\SysLogService;
+//use App\Services\SysLogService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 
@@ -52,7 +52,7 @@ class DepartmentController extends Controller
 
         if($this->authService->checkPermission($request, 'add','human-resource/master-data/department/add-new')){
             $data = $this->departmentService->store($validatedData);
-            SysLogService::log($user['id'], $request->input('locationId'), 'Added a new department');
+//            SysLogService::log($user['id'], $request->input('locationId'), 'Added a new department');
             return $this->successResponse($data);
         }
 
@@ -67,7 +67,7 @@ class DepartmentController extends Controller
             try {
                 $validatedData = $request->validated();
                 $data = $this->departmentService->update($id, $validatedData);
-                SysLogService::log($user['id'],$request->input('locationId'),'Updated a Department');
+//                SysLogService::log($user['id'],$request->input('locationId'),'Updated a Department');
                 return $this->successResponse($data);
             }catch (DepartmentNotFoundException $e){
                 return $this->errorResponse($e->getMessage());
@@ -85,7 +85,7 @@ class DepartmentController extends Controller
         try {
             $this->departmentService->delete($id);
             $user = $this->authService->getAuthUser($request);
-            SysLogService::log($user['id'], $request->input('locationId'),'Deleted a department');
+//            SysLogService::log($user['id'], $request->input('locationId'),'Deleted a department');
             return $this->successResponse('Department deleted successfully');
         }catch (DepartmentNotFoundException $e){
             return $this->errorResponse($e->getMessage());

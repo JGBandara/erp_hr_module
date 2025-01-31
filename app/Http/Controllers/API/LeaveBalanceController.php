@@ -43,4 +43,12 @@ class LeaveBalanceController extends Controller
     {
         return $this->successResponse($this->leaveBalanceService->getAllByEmployeeId($empId));
     }
+    public function getSelf(Request $request){
+        try {
+            $user = $this->authService->getAuthUser($request);
+            return $this->successResponse($this->leaveBalanceService->getAllByEmployeeId($user['emp_id']));
+        }catch (UnauthorizedException $e){
+            return $this->errorResponse($e->getMessage(),[],401);
+        }
+    }
 }
