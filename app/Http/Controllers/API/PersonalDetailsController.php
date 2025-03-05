@@ -7,25 +7,22 @@ use App\Exceptions\UnauthorizedException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePersonalDetailsRequest;
 use App\Http\Requests\UpdateProfilePicRequest;
-use App\Services\AuthService;
 use App\Services\PersonalDetailsService;
+use App\Services\Util\AuthService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
-use function Laravel\Prompts\error;
 
 class PersonalDetailsController extends Controller
 {
     use ApiResponse;
     private PersonalDetailsService $personalDetailsService;
-    private AuthService $authService;
 
-    public function __construct(PersonalDetailsService $personalDetailsService, AuthService $authService){
+    public function __construct(PersonalDetailsService $personalDetailsService){
         $this->personalDetailsService = $personalDetailsService;
-        $this->authService = $authService;
     }
 
     public function store(StorePersonalDetailsRequest $request){
-        if($this->authService->checkPermission($request, 'add','human-resource/employee/personal-details/add-new')){
+        if(AuthService::checkPermission($request, 'add','human-resource/employee/personal-details/add-new')){
             $validatedData = $request->validated();
             try {
                 $data = $this->personalDetailsService->store($validatedData);
@@ -56,7 +53,7 @@ class PersonalDetailsController extends Controller
     }
 
     public function getAll(Request $request){
-        if($this->authService->checkPermission($request, 'view','human-resource/employee/personal-details/add-new')){
+        if(AuthService::checkPermission($request, 'view','human-resource/employee/personal-details/add-new')){
             try {
                 return $this->successResponse($this->personalDetailsService->getAll());
             }catch (\Exception $e){
@@ -69,9 +66,9 @@ class PersonalDetailsController extends Controller
 
     public function update(StorePersonalDetailsRequest $request, int $id){
 
-        if($this->authService->checkPermission($request, 'edit','human-resource/employee/personal-details/add-new')){
+        if(AuthService::checkPermission($request, 'edit','human-resource/employee/personal-details/add-new')){
             try{
-                $userId =  $this->authService->getAuthUser($request);
+                $userId =  AuthService::getAuthUser($request);
                 $validatedData = $request->validated();
                 $data = $this->personalDetailsService->update($validatedData, $id, (int)$userId);
                 return $this->successResponse($data);
@@ -90,13 +87,13 @@ class PersonalDetailsController extends Controller
         }
     }
     public function getAllAssignedEmployeesForLeaveApproval(Request $request){
-        $empId = $this->authService->getAuthUser($request)['emp_id'];
+        $empId = AuthService::getAuthUser($request)['emp_id'];
 
         return $this->successResponse($this->personalDetailsService->getAllAssignedForApproval($empId));
     }
     public function getSelf(Request $request){
         try {
-            $user = $this->authService->getAuthUser($request);
+            $user = AuthService::getAuthUser($request);
             $empId = $user['emp_id'];
             return $this->successResponse($this->personalDetailsService->getAllDetails($empId));
         }catch (UnauthorizedException $e){

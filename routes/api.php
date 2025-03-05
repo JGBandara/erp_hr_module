@@ -7,6 +7,7 @@ use App\Http\Controllers\API\DependentController;
 use App\Http\Controllers\API\DesignationController;
 use App\Http\Controllers\API\DistrictsController;
 use App\Http\Controllers\API\DivisionController;
+use App\Http\Controllers\API\DocumentTypeController;
 use App\Http\Controllers\API\EbExamController;
 use App\Http\Controllers\API\EbExamTypeController;
 use App\Http\Controllers\API\EducationQualificationController;
@@ -43,49 +44,42 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 
 
-Route::post('departments', [DepartmentController::class, 'store']);
-Route::put('departments/{id}', [DepartmentController::class, 'update']);
-Route::delete('departments/{id}', [DepartmentController::class, 'destroy']);
+Route::post('/departments/add', [DepartmentController::class, 'store']);
+Route::put('/departments/update', [DepartmentController::class, 'update']);
+Route::delete('/departments/{id}', [DepartmentController::class, 'destroy']);
 Route::get('/departments/all', [DepartmentController::class, 'getAll']);
-Route::get('/departments/{id}', [DepartmentController::class, 'show']);
+Route::get('/departments/{id}', [DepartmentController::class, 'getById']);
 
+Route::post('/employee-category/add', [EmployeeCategoryController::class, 'store']);
+Route::put('/employee-category/update', [EmployeeCategoryController::class, 'update']);
+Route::delete('/employee-category/{id}', [EmployeeCategoryController::class, 'destroy']);
+Route::get('/employee-category/all', [EmployeeCategoryController::class, 'getAll']);
+Route::get('/employee-category/{id}', [EmployeeCategoryController::class, 'getById']);
 
-Route::get('/category/getAll', [EmployeeCategoryController::class, 'index']);
-Route::get('/category/{id}', [EmployeeCategoryController::class, 'getAllDetails']);
-Route::post('/category', [EmployeeCategoryController::class, 'store']);
-Route::put('/category/{id}', [EmployeeCategoryController::class, 'update']);
-Route::delete('/category/{id}', [EmployeeCategoryController::class, 'destroy']);
-
-Route::get('/division/getAll', [DivisionController::class, 'index']);
-Route::get('/division/{id}', [DivisionController::class, 'getAllDetails']);
-Route::post('/division', [DivisionController::class, 'store']);
-Route::put('/division/{id}', [DivisionController::class, 'update']);
+Route::post('/division/add', [DivisionController::class, 'store']);
+Route::put('/division/update', [DivisionController::class, 'update']);
 Route::delete('/division/{id}', [DivisionController::class, 'destroy']);
+Route::get('/division/all', [DivisionController::class, 'getAll']);
+Route::get('/division/{id}', [DivisionController::class, 'getById']);
 
-Route::get('/category/getAll', [EmployeeCategoryController::class, 'index']);
-Route::delete('/category/{id}', [EmployeeCategoryController::class, 'destroy']);
-Route::get('/category/{id}', [EmployeeCategoryController::class, 'getAllDetails']);
-Route::post('/category', [EmployeeCategoryController::class, 'store']);
-Route::put('/category/{id}', [EmployeeCategoryController::class, 'update']);
-
-
-Route::get('/designation/getAll', [DesignationController::class, 'index']);
-Route::get('/designation/{id}', [DesignationController::class, 'getAllDetails']);
-Route::post('/designation', [DesignationController::class, 'store']);
-Route::put('/designation/{id}', [DesignationController::class, 'update']);
+Route::post('/designation/add', [DesignationController::class, 'store']);
+Route::put('/designation/update', [DesignationController::class, 'update']);
 Route::delete('/designation/{id}', [DesignationController::class, 'destroy']);
+Route::get('/designation/all', [DesignationController::class, 'getAll']);
+Route::get('/designation/{id}', [DesignationController::class, 'getById']);
 
-Route::get('/qualification/getAll', [EducationQualificationController::class, 'index']);
-Route::get('/qualification/{id}', [EducationQualificationController::class, 'getAllDetails']);
-Route::post('/qualification', [EducationQualificationController::class, 'store']);
-Route::put('/qualification/{id}', [EducationQualificationController::class, 'update']);
+Route::post('/qualification/add', [EducationQualificationController::class, 'store']);
+Route::put('/qualification/update', [EducationQualificationController::class, 'update']);
 Route::delete('/qualification/{id}', [EducationQualificationController::class, 'destroy']);
+Route::get('/qualification/all', [EducationQualificationController::class, 'getAll']);
+Route::get('/qualification/{id}', [EducationQualificationController::class, 'getById']);
 
-Route::get('/ebExamType', [EbExamTypeController::class, 'index']);
-Route::get('/ebExamType/{id}', [EbExamTypeController::class, 'show']);
-Route::post('/ebExamType', [EbExamTypeController::class, 'store']);
-Route::put('/ebExamType/{id}', [EbExamTypeController::class, 'update']);
-Route::delete('/ebExamType/{id}', [EbExamTypeController::class, 'destroy']);
+Route::post('/eb-exam-type/add', [EbExamTypeController::class, 'store']);
+Route::put('/eb-exam-type/update', [EbExamTypeController::class, 'update']);
+Route::delete('/eb-exam-type/{id}', [EbExamTypeController::class, 'destroy']);
+Route::get('/eb-exam-type/all', [EbExamTypeController::class, 'index']);
+Route::get('/eb-exam-type/{id}', [EbExamTypeController::class, 'show']);
+
 Route::post('/ebExamTypeDesignation', [EbExamTypeController::class, 'index']);
 Route::get('/ebExamTypeDesignation/{id}', [EbExamTypeController::class, 'show']);
 Route::post('/ebExamTypeDesignation', [EbExamTypeController::class, 'store']);
@@ -108,7 +102,7 @@ Route::post('/trainingProgramme', [TrainingProgrammeController::class, 'store'])
 Route::put('/trainingProgramme/{id}', [TrainingProgrammeController::class, 'update']);
 Route::delete('/trainingProgramme/{id}', [TrainingProgrammeController::class, 'destroy']);
 
-Route::post('/resignType/getAll', [ResignTypeController::class, 'index']);
+Route::get('/resignType/getAll', [ResignTypeController::class, 'index']);
 Route::get('/resignType/{id}', [ResignTypeController::class, 'getAllDetails']);
 Route::post('/resignType', [ResignTypeController::class, 'store']);
 Route::put('/resignType/{id}', [ResignTypeController::class, 'update']);
@@ -175,3 +169,9 @@ Route::get('/leaveBalance/get/self',[LeaveBalanceController::class,'getSelf']);
 Route::post('/mail/request-mail',[CoveringOfficerController::class,'sendRequest']);
 
 Route::get('/covering-officer/request/accept/{empId}',[CoveringOfficerController::class,'accept']);
+
+Route::post('/documentTypes/add',[DocumentTypeController::class,'store']);
+Route::put('/documentTypes/update',[DocumentTypeController::class,'update']);
+Route::delete('/documentTypes/delete/{id}',[DocumentTypeController::class,'delete']);
+Route::get('/documentTypes/getAll',[DocumentTypeController::class,'getAll']);
+Route::get('/documentTypes/get/{id}',[DocumentTypeController::class,'getById']);

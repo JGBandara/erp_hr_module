@@ -18,10 +18,12 @@ use Illuminate\Support\Facades\Mail;
 class LeaveRequestService
 {
     private ApprovalService $approvalService;
+    private NotificationService $notificationService;
 
-    public function __construct(ApprovalService $approvalService)
+    public function __construct(ApprovalService $approvalService, NotificationService $notificationService)
     {
         $this->approvalService = $approvalService;
+        $this->notificationService = $notificationService;
     }
 
     /**
@@ -43,7 +45,7 @@ class LeaveRequestService
                     if($data['covering_officer_id'] != 0){
                         $this->sendMailToCoveringOfficer($leaveReq['id']);
                     }else{
-                        $this->approvalService->store([
+                        return $this->approvalService->store([
                             'request_id' => $leaveReq->id,
                             'type_id' => 1
                         ]);
@@ -72,9 +74,12 @@ class LeaveRequestService
                 'request_id' => $request['id'],
                 'request_type_id' => 1,
             ])->orderByDesc('level')->first();
-            if ($approval['is_pending'] == 1 || $approval['is_approved'] == 1) {
-                $count += $request['no_of_days'];
+            if($approval){
+                if ($approval['is_pending'] == 1 || $approval['is_approved'] == 1) {
+                    $count += $request['no_of_days'];
+                }
             }
+
         }
 
         $special = LeaveBalance::where([
@@ -204,7 +209,7 @@ class LeaveRequestService
         }
         return $dates;
     }
-    private function sendMailToCoveringOfficer($requestId): void
+    private function sendMailToCoveringOfficer($requestId)
     {
         $data = $this->getById($requestId);
         $employee = PersonalDetails::find($data['emp_id']);
@@ -221,11 +226,15 @@ class LeaveRequestService
             'start_date'        => $data['date_from'],
             'end_date'          => $data['date_to'],
             'covering_officer_id' => $coveringOfficer['id'],
+            'to' => $coveringOfficer['personal_email'],
         ];
-        Mail::to($leaveData['email'])->queue(new CoveringOfficerActionMail($leaveData));
+        $this->notificationService->sendMail($leaveData,'leave-request-confirm','Request to become a covering officer');
     }
     private function genarateLeaveRequestNumber(){
         $max = LeaveRequest::max('id');
         return 'REQ/LEV/'.(++$max);
+    }
+    public function getRemainingLeaveCount($empId, $leaveTypeId){
+
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Services\Util\AuthService;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -13,7 +14,7 @@ class UpdateDepartmentRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return AuthService::checkPermission(request(), 'edit', 'human-resource/master-data/department/add-new');
     }
 
     /**
@@ -24,8 +25,9 @@ class UpdateDepartmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'department_code' => 'required|string',
-            'department_name' => 'required|string|max:255',
+            'id'=>'required|integer',
+            'code' => 'required|string',
+            'name' => 'required|string|max:255',
             'remark' => 'nullable|string',
             'active' => 'required|boolean',
         ];
@@ -39,4 +41,24 @@ class UpdateDepartmentRequest extends FormRequest
         ], 422);
         throw new HttpResponseException($response);
     }
+    public function messages(): array
+    {
+        return [
+            'id.required' => 'The ID is required.',
+            'id.integer' => 'The ID must be an integer.',
+
+            'code.required' => 'The code is required.',
+            'code.string' => 'The code must be a string.',
+
+            'name.required' => 'The name is required.',
+            'name.string' => 'The name must be a string.',
+            'name.max' => 'The name must not exceed 255 characters.',
+
+            'remark.string' => 'The remark must be a string.',
+
+            'active.required' => 'The active field is required.',
+            'active.boolean' => 'The active field must be true or false.',
+        ];
+    }
+
 }

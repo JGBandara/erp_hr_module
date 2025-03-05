@@ -6,87 +6,68 @@ use App\Exceptions\CRUDException;
 use App\Exceptions\UnauthorizedException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreDesignationRequest;
-use App\Services\AuthService;
-use Illuminate\Http\Request;
+use App\Http\Requests\UpdateDesignationRequest;
 use App\Services\DesignationService;
+use App\Services\Util\AuthService;
 use App\Traits\ApiResponse;
+use Illuminate\Http\Request;
 
 class DesignationController extends Controller
 {
     use ApiResponse;
 
     private DesignationService $designationService;
-    private AuthService $authService;
 
-    public function __construct(DesignationService $designationService, AuthService $authService)
+    public function __construct(DesignationService $designationService)
     {
         $this->designationService = $designationService;
-        $this->authService = $authService;
     }
 
-    public function index()
+    public function store(StoreDesignationRequest $request)
+    {
+        $validatedData = $request->validated();
+        try {
+            $userId = AuthService::getAuthUser($request)['id'];
+            $validatedData['created_by'] = $userId;
+            $data = $this->designationService->store($validatedData);
+            return $this->successResponse($data, 'Data Saved Successfully', 200);
+        } catch (\Exception $e) {
+            return $this->errorResponse([], [$e->getMessage()]);
+        }
+    }
+
+    public function update(UpdateDesignationRequest $request)
+    {
+        try {
+            $validatedData = $request->validated();
+            $this->designationService->update($validatedData);
+            return $this->successResponse();
+        } catch (\Exception $e) {
+            return $this->errorResponse([], $e->getMessage());
+        }
+    }
+
+    public function getAll()
     {
         return $this->successResponse($this->designationService->getAll());
     }
 
-
-    public function store(StoreDesignationRequest $request)
+    public function getById(int $id)
     {
-        if ($this->authService->checkPermission($request, 'add', 'human-resource/master-data/manage-cardre/add-new')) {
-            $validatedData = $request->validated();
-            try {
-                $data = $this->designationService->store($validatedData);
-                return $this->successResponse($data, 'Data Saved Successfully', 200);
-            } catch (\Exception $e) {
-                return $this->errorResponse([], [$e->getMessage()]);
-            }
-        }
-        return $this->errorResponse("You don't have permission to add designation", [], 401);
-
-    }
-
-    public function getAllDetails(Request $request, int $id)
-    {
-        try {
-            $this->authService->getAuthUser($request);
-            return $this->successResponse($this->designationService->getAllDetails($id));
-
-        } catch (UnauthorizedException $e){
-            return $this->errorResponse($e->getMessage(),[],401);
-        } catch (\Exception $e) {
-            return $this->errorResponse();
-        }
-    }
-
-    public function update(StoreDesignationRequest $request, $id)
-    {
-        if($this->authService->checkPermission($request, 'edit','human-resource/master-data/manage-cardre/add-new')){
-            try {
-                $userId = $this->authService->getAuthUser($request);
-                $validatedData = $request->validated();
-
-                $this->designationService->update($validatedData, $id, $userId);
-                return $this->successResponse();
-            } catch (UnauthorizedException $e) {
-                return $this->errorResponse($e->getMessage(), [], 401);
-            } catch (\Exception $e) {
-                return $this->errorResponse([], $e->getMessage());
-            }
-        }
-        return $this->errorResponse("You don't have permission to update Designation",[],401);
+        return $this->successResponse($this->designationService->getById($id));
     }
 
     public function destroy(Request $request, $id)
     {
-        if($this->authService->checkPermission($request, 'remove','human-resource/master-data/manage-cardre/add-new')){
+        if (AuthService::checkPermission($request, 'remove', 'human-resource/master-data/manage-cardre/add-new')) {
             try {
-                $userId = $this->authService->getAuthUser($request);
+                $userId = AuthService::getAuthUser($request);
                 $this->designationService->delete($id, $userId);
                 return $this->successResponse();
-            }catch (CRUDException $e){
+            } catch (CRUDException|UnauthorizedException $e) {
                 return $this->errorResponse($e->getMessage());
             }
         }
-        return $this->errorResponse("You don't have permission to delete designation",[],401);
+        return $this->errorResponse("You don't have permission to delete designation", [], 401);
     }
 }

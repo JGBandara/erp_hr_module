@@ -10,7 +10,23 @@ class Designation extends Model
     use HasFactory;
 
     protected $table = 'hr_mst_designation';
-    protected $fillable = ['des_emp_cat_id', 'des_code', 'des_name', 'des_salary_scale_id', 'des_ot_allowed', 'des_early_ot_allowed', 'des_carder', 'des_rank', 'des_dep_id', 'des_duties', 'des_remark', 'des_status','des_is_deleted','des_modified_by','des_deleted_by'];
+    protected $fillable = [
+        'employee_category_id',
+        'code',
+        'name',
+        'salary_scale_id',
+        'ot_allowed',
+        'early_ot_allowed',
+        'carder',
+        'rank',
+        'duties',
+        'remark',
+        'active',
+        'created_by',
+        'is_deleted',
+        'deleted_by',
+    ];
+
 
     public function departments()
     {

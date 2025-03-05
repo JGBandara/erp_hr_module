@@ -6,11 +6,11 @@ use App\Exceptions\UnauthorizedException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreLeaveTypeRequest;
 use App\Models\LeaveType;
-use Illuminate\Http\Request;
 use App\Services\LeaveTypeService;
+use App\Services\Util\AuthService;
 use App\Traits\ApiResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 
 class LeaveTypeController extends Controller
 {
@@ -30,7 +30,6 @@ class LeaveTypeController extends Controller
 
     public function store(StoreLeaveTypeRequest $request)
     {
-//        return $request->all();
         $validatedData = $request->validated();
         try {
             $data = $this->leaveTypeService->store($validatedData);
@@ -51,21 +50,16 @@ class LeaveTypeController extends Controller
 
     public function update(StoreLeaveTypeRequest $request, int $id)
     {
-        try {
 
-            Log::info('Update Request Data: ', $request->all());
-
-            $userId = $this->checkPermission($request, 94);
+        if(AuthService::checkPermission($request,'edit','human-resource/master-data/leave-type/add-new')){
             $validatedData = $request->validated();
-
-            Log::info('Validated Data: ', $validatedData);
-
+            $userId = AuthService::getAuthUser($request)['id'];
             $this->leaveTypeService->update($validatedData, $id, $userId);
             return $this->successResponse();
-        } catch (UnauthorizedException $e) {
+
+        }else{
             return $this->errorResponse([], ["You don't have permission to update Division ...!"], 401);
-        } catch (\Exception $e) {
-            return $this->errorResponse([], $e->getMessage());
+
         }
     }
 
@@ -73,8 +67,10 @@ class LeaveTypeController extends Controller
     public function destroy(Request $request, $id)
     {
         try {
-
-            $userId = $this->checkPermission($request, 94);
+            if(!AuthService::checkPermission($request.'remove','human-resource/master-data/leave-type/add-new')){
+                return $this->errorResponse([], ["You don't have permission to delete this LeaveType...!"], 401);
+            }
+            $userId = AuthService::getAuthUser($request);
 
             $leaveType = LeaveType::find($id);
             if (!$leaveType) {
@@ -87,22 +83,8 @@ class LeaveTypeController extends Controller
 
 
             return $this->successResponse([], 'Leave Type deleted successfully.');
-        } catch (UnauthorizedException $e) {
-            return $this->errorResponse([], ["You don't have permission to delete this LeaveType...!"], 401);
         } catch (\Exception $e) {
             return $this->errorResponse([], [$e->getMessage()]);
         }
-    }
-
-    private function checkPermission(Request $request, int $privilegeId): int
-    {
-        $response = Http::withHeaders([
-            'Authorization' => $request->header('Authorization')
-        ])->get('http://localhost:8002/api/permission/check/' . $privilegeId);
-        if ($response->status() == 200) {
-            return $response['data']['id'];
-        }
-
-        throw new UnauthorizedException('Unauthorized...!');
     }
 }

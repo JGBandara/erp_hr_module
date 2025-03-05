@@ -14,14 +14,15 @@ return new class extends Migration
     {
         Schema::create('hr_mst_division', function (Blueprint $table) {
             $table->id();
-            $table->string('div_code')->unique();
-            $table->string('div_name');
-            $table->integer('div_dep_id');
-            $table->integer('div_head');
-            $table->string('div_remark')->nullable();
-            $table->integer('div_status')->default(1);
-            $table->integer('div_is_deleted')->default(0);
-            $table->integer('div_modified_by')->nullable();
+            $table->string('code')->unique();
+            $table->string('name');
+            $table->integer('department_id');
+            $table->integer('head_of_department_id');
+            $table->string('remark')->nullable();
+            $table->boolean('active')->default(true);
+            $table->integer('created_by');
+            $table->boolean('is_deleted')->default(false);
+            $table->integer('deletedBy')->default(0);
             $table->timestamps();
         });
     }

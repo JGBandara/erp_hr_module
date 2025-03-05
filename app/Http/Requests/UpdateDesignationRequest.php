@@ -7,14 +7,14 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class StoreDesignationRequest extends FormRequest
+class UpdateDesignationRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return AuthService::checkPermission(request(),'add','human-resource/master-data/manage-cardre/add-new');
+        return AuthService::checkPermission(request(),'edit','human-resource/master-data/manage-cardre/add-new');
     }
 
     /**
@@ -25,23 +25,24 @@ class StoreDesignationRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'id'=>'required|integer',
             'employee_category_id' => 'required|integer|exists:hr_mst_emp_category,id',
-            'code' => 'required|string|unique:hr_mst_designation,code',
+            'code' => 'required|string',
             'name' => 'required|string|max:255',
             'salary_scale_id' => 'required|integer',
-            'ot_allowed' => 'boolean',
-            'early_ot_allowed' => 'boolean',
+            'ot_allowed' => 'required|boolean',
+            'early_ot_allowed' => 'required|boolean',
             'carder' => 'required|integer|min:1',
             'rank' => 'required|integer|min:1',
             'duties' => 'required|string',
             'remark' => 'nullable|string',
             'active' => 'boolean',
-            'departments'=>'',
         ];
     }
     public function messages(): array
     {
         return [
+            'id.required'=>'The Designation ID required.',
             'employee_category_id.required' => 'The employee category ID is required.',
             'employee_category_id.string' => 'The employee category ID must be a string.',
             'employee_category_id.exists' => 'The selected employee category does not exist.',

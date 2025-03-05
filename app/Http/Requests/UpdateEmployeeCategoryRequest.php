@@ -7,14 +7,14 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class StoreDepartmentRequest extends FormRequest
+class UpdateEmployeeCategoryRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return AuthService::checkPermission(request(),'add','human-resource/master-data/department/add-new');
+        return AuthService::checkPermission(request(), 'edit', 'human-resource/master-data/employee-category/add-new');
     }
 
     /**
@@ -25,32 +25,40 @@ class StoreDepartmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'code' => 'required|string|unique:hr_mst_department,code',
+            'id'=>'required|integer',
+            'code' => 'required|string',
             'name' => 'required|string|max:255',
+            'level' => 'required|string|max:255',
+            'rank' => 'required|integer|min:1',
             'remark' => 'nullable|string',
             'active' => 'boolean',
-            'is_deleted' => 'boolean',
         ];
     }
-
     public function messages(): array
     {
         return [
-            'code.required' => 'The department code is required.',
-            'code.string' => 'The department code must be a string.',
-            'code.unique' => 'The department code must be unique.',
+            'code.required' => 'The code is required.',
+            'code.string' => 'The code must be a string.',
+            'code.unique' => 'The code must be unique.',
 
-            'name.required' => 'The department name is required.',
-            'name.string' => 'The department name must be a string.',
-            'name.max' => 'The department name must not exceed 255 characters.',
+            'name.required' => 'The name is required.',
+            'name.string' => 'The name must be a string.',
+            'name.max' => 'The name must not exceed 255 characters.',
+
+            'level.required' => 'The level is required.',
+            'level.string' => 'The level must be a string.',
+            'level.max' => 'The level must not exceed 255 characters.',
+
+            'rank.required' => 'The rank is required.',
+            'rank.integer' => 'The rank must be an integer.',
+            'rank.min' => 'The rank must be at least 1.',
 
             'remark.string' => 'The remark must be a string.',
 
+            'active.required' => 'The active field is required.',
             'active.boolean' => 'The active field must be true or false.',
-
         ];
     }
-
 
     protected function failedValidation(Validator $validator)
     {

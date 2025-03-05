@@ -51,12 +51,13 @@ class LeaveTypeService
     }
 
     public function getAll(){
-         $details = LeaveType::all();
-         $arr = array();
-         foreach ($details as $type){
-             array_push($arr, ['id'=>$type->id, 'lv_name'=>$type->lv_name, 'count'=>$type->lv_default_count]);
-         }
-         return $arr;
+         $details = LeaveType::select([
+             'id',
+             'lv_name',
+             'lv_code',
+             'lv_default_count',
+         ])->where('lv_is_deleted',false)->get();
+         return $details;
     }
 
     public function getAllDetails(int $id){
@@ -88,7 +89,7 @@ class LeaveTypeService
         }
 
 
-        $LeaveType->modified_by = $modifiedBy;
+        $LeaveType->lv_modified_by = $modifiedBy;
 
         $LeaveType->save();
 

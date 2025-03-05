@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('lv_code');
             $table->string('lv_name');
-            $table->integer('period_id');
+            $table->integer('period_id')->default(0);
             $table->string('lv_salary_deduct');
             $table->integer('lv_count_working_days');
             $table->decimal('lv_default_count');

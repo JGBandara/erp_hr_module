@@ -6,12 +6,20 @@ use App\Exceptions\CRUDException;
 use App\Models\ForApproval;
 use App\Models\LeaveApprovalOfficer;
 use App\Models\LeaveRequest;
+use App\Models\LeaveType;
 use App\Models\Notification;
 use App\Models\PersonalDetails;
 use Carbon\Carbon;
 
 class ApprovalService
 {
+    private NotificationService $notificationService;
+    private LeaveBalanceService $leaveBalanceService;
+    public function __construct(NotificationService $notificationService, LeaveBalanceService $leaveBalanceService)
+    {
+        $this->notificationService = $notificationService;
+        $this->leaveBalanceService = $leaveBalanceService;
+    }
 
     public function store(array $data){
         $requestId = $data['request_id'];
@@ -24,6 +32,18 @@ class ApprovalService
                 'request_type_id'=>$typeId,
                 'level'=>$level,
             ]);
+            if($typeId == 1){
+                $leaveRequest = LeaveRequest::find($requestId);
+                $personalDetails = PersonalDetails::find($leaveRequest->emp_id);
+                $approvalOfficers = $personalDetails->approvalOfficersByLevel($level);
+                $arr = [];
+//                return $approvalOfficers;
+//                foreach ($approvalOfficers as $officer){
+//                    $arr[] = $officer['officer_id'];
+//                }
+//return $arr;
+                return $this->processMail($approvalOfficers, $leaveRequest);
+            }
         }catch (CRUDException $e){
             $empId = 0;
             if($typeId == 1){
@@ -91,6 +111,7 @@ class ApprovalService
             ->where('request_type_id', $typeId)
             ->where('level', '<', $maxLevel)
             ->get();
+
         if(!$approvals){
             return null;
         }
@@ -100,6 +121,45 @@ class ApprovalService
         }
         return $approvals;
 
+    }
+    private function processMail($officers, $request){
+        $approvals = $this->getPreviousApprovals($request['id'],1);
+        $dataSet = [];
+
+        $empData = PersonalDetails::find($request['emp_id']);
+
+        $dataSet['employeeName'] = $empData['full_name'];
+        $dataSet['ppno'] = $empData['personal_file_no'];
+
+        if($request['covering_officer_id'] != 0){
+            $coveringOfficer = PersonalDetails::find($request['covering_officer_id']);
+            $dataSet['coveringOfficer'] = $coveringOfficer['full_name'];
+        }else{
+            $dataSet['coveringOfficer'] = '--';
+        }
+        $dataSet['year'] = $request['year'];
+
+        $leaveType = LeaveType::find($request['leave_type_id']);
+        $dataSet['requestType'] = 'Leave Request - '.$leaveType['lv_name'];
+
+        $leaveBalances = $this->leaveBalanceService->getAllByEmployeeId($request['emp_id']);
+        $dataSet['leaveBalance'] = [];
+
+        foreach ($leaveBalances as $leaveBalance){
+            array_push($dataSet['leaveBalance'],[$leaveBalance['lv_name'],$leaveBalance['count'],0]);
+        }
+
+        $dataSet['approvalHistory'] = [];
+        foreach ($approvals as $approval){
+            $dataSet['approvalHistory'] = [$approval['level'],$approval['remark'],$approval['action_by']['full_name'],$approval['action_on'],$approval['is_approved']==1?'Approved':'Reject'];
+        }
+
+        foreach ($officers as $officer){
+            $data = PersonalDetails::find($officer['officer_id']);
+            $dataSet['to'] = $data['personal_email'];
+            $this->notificationService->sendMail($dataSet,'leave-request-action', 'Leave Request For Approval');
+        }
+        return $dataSet;
     }
 
 }

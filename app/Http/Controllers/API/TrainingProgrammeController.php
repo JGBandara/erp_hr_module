@@ -10,14 +10,13 @@ use App\Traits\ApiResponse;
 class TrainingProgrammeController extends Controller
 {
     use ApiResponse;
-   
+
     public function index()
     {
         $trainingProgramme = TrainingProgramme::all();
         return response()->json($trainingProgramme);
     }
 
-    // Load data (Get a specific department by ID)
     public function show($id)
     {
         $trainingProgramme = TrainingProgramme::find($id);
@@ -27,7 +26,6 @@ class TrainingProgrammeController extends Controller
         return response()->json($trainingProgramme);
     }
 
-    // Add a new department
     public function store(Request $request)
     {
         $trainingProgramme = new TrainingProgramme();

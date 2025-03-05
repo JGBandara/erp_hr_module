@@ -13,11 +13,13 @@ return new class extends Migration
     {
         Schema::create('hr_mst_department', function (Blueprint $table) {
             $table->id();
-            $table->string('dep_code')->unique();
-            $table->string('dep_name');
-            $table->string('dep_remark');
-            $table->integer('dep_status');
-            $table->integer('dep_is_deleted')->default(0);
+            $table->string('code')->unique();
+            $table->string('name');
+            $table->string('remark');
+            $table->boolean('active')->default(true);
+            $table->integer('created_by');
+            $table->boolean('is_deleted')->default(false);
+            $table->integer('deleted_by')->default(0);
             $table->timestamps();
         });
     }

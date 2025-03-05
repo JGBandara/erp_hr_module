@@ -7,14 +7,14 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class StoreEmployeeCategoryRequest extends FormRequest
+class UpdateDivisionRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return AuthService::checkPermission(request(), 'add', 'human-resource/master-data/employee-category/add-new');
+        return AuthService::checkPermission(request(),'edit','human-resource/master-data/division/add-new');
     }
 
     /**
@@ -25,10 +25,11 @@ class StoreEmployeeCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'code' => 'required|string|unique:hr_mst_emp_category,code',
+            'id'=>'required|integer',
+            'code' => 'required|string',
             'name' => 'required|string|max:255',
-            'level' => 'required|string|max:255',
-            'rank' => 'required|integer|min:1',
+            'department_id' => 'required|integer|exists:hr_mst_department,id',
+            'head_of_department_id' => 'required|integer|exists:hr_emp_personal_details,id',
             'remark' => 'nullable|string',
             'active' => 'boolean',
         ];
@@ -36,6 +37,7 @@ class StoreEmployeeCategoryRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'id.required'=>'The division id required.',
             'code.required' => 'The code is required.',
             'code.string' => 'The code must be a string.',
             'code.unique' => 'The code must be unique.',
@@ -44,21 +46,19 @@ class StoreEmployeeCategoryRequest extends FormRequest
             'name.string' => 'The name must be a string.',
             'name.max' => 'The name must not exceed 255 characters.',
 
-            'level.required' => 'The level is required.',
-            'level.string' => 'The level must be a string.',
-            'level.max' => 'The level must not exceed 255 characters.',
+            'department_id.required' => 'The department ID is required.',
+            'department_id.integer' => 'The department ID must be an integer.',
+            'department_id.exists' => 'The selected department does not exist.',
 
-            'rank.required' => 'The rank is required.',
-            'rank.integer' => 'The rank must be an integer.',
-            'rank.min' => 'The rank must be at least 1.',
+            'head_of_department_id.required' => 'The head of department ID is required.',
+            'head_of_department_id.integer' => 'The head of department ID must be an integer.',
+            'head_of_department_id.exists' => 'The selected head of department does not exist.',
 
             'remark.string' => 'The remark must be a string.',
 
-            'active.required' => 'The active field is required.',
             'active.boolean' => 'The active field must be true or false.',
         ];
     }
-
     protected function failedValidation(Validator $validator)
     {
         $response = response()->json([

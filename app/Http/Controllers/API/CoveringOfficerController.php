@@ -5,26 +5,22 @@ namespace App\Http\Controllers\API;
 use App\Exceptions\CRUDException;
 use App\Exceptions\UnauthorizedException;
 use App\Http\Controllers\Controller;
-use App\Mail\RequestMail;
-use App\Services\AuthService;
 use App\Services\CoveringOfficerService;
 use App\Services\PersonalDetailsService;
+use App\Services\Util\AuthService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
 
 class CoveringOfficerController extends Controller
 {
     use ApiResponse;
 
     private CoveringOfficerService $coveringOfficerService;
-    private AuthService $authService;
     private PersonalDetailsService $personalDetailsService;
 
-    public function __construct(CoveringOfficerService $coveringOfficerService, AuthService $authService, PersonalDetailsService $personalDetailsService)
+    public function __construct(CoveringOfficerService $coveringOfficerService, PersonalDetailsService $personalDetailsService)
     {
         $this->coveringOfficerService = $coveringOfficerService;
-        $this->authService = $authService;
         $this->personalDetailsService = $personalDetailsService;
     }
 
@@ -34,7 +30,7 @@ class CoveringOfficerController extends Controller
     }
     public function setOfficer(Request $request){
         $data = $request->all();
-        $user = $this->authService->getAuthUser($request);
+        $user = AuthService::getAuthUser($request);
 
         try {
             $officer = $this->coveringOfficerService->getCoveringOfficerByEmployeeAndOfficerId($data['emp_id'], $data['covering_officer_id']);
@@ -46,7 +42,7 @@ class CoveringOfficerController extends Controller
     }
     public function removeOfficer($empId, $officerId, Request $request){
         $data = $request->all();
-        $user = $this->authService->getAuthUser($request);
+        $user = AuthService::getAuthUser($request);
 
         try {
             $officer = $this->coveringOfficerService->getCoveringOfficerByEmployeeAndOfficerId($empId, $officerId);
@@ -60,7 +56,7 @@ class CoveringOfficerController extends Controller
     }
     public function sendRequest(Request $request){
         try {
-            $user = $this->authService->getAuthUser($request);
+            $user = AuthService::getAuthUser($request);
             $employee = $this->personalDetailsService->getAllDetails($user['emp_id']);
             $this->coveringOfficerService->sendRequest($employee, $request->all());
         }catch (UnauthorizedException $e){
@@ -68,9 +64,8 @@ class CoveringOfficerController extends Controller
         }
     }
     public function accept(Request $request, $empId){
-//        return 'lllll';
         try {
-            $user = $this->authService->getAuthUser($request);
+            $user = AuthService::getAuthUser($request);
             return $this->coveringOfficerService->requestAction($user['id'], $empId,true);
         }catch (UnauthorizedException $e){
             return $this->errorResponse($e->getMessage());

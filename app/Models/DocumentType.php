@@ -5,12 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class EbExamType extends Model
+class DocumentType extends Model
 {
     use HasFactory;
-    protected $table = 'hr_mst_eb_exam_type';
+    protected $table = 'hr_mst_document_type';
     protected $fillable = [
-        'name',
+        'type',
         'remark',
         'active',
         'created_by',

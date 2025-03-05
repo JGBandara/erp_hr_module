@@ -13,11 +13,12 @@ return new class extends Migration
     {
         Schema::create('hr_mst_eb_exam_type', function (Blueprint $table) {
             $table->id();
-            $table->string('ext_name');
-            $table->integer('ext_emp_cat_id');
-            $table->integer('ext_grade_id');
-            $table->string('ext_remark');
-            $table->integer('ext_status');
+            $table->string('name');
+            $table->string('remark');
+            $table->boolean('active')->default(true);
+            $table->integer('created_by');
+            $table->boolean('is_deleted')->default(false);
+            $table->integer('deleted_by')->default(0);
             $table->timestamps();
         });
     }

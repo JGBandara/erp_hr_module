@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Util;
 
 use App\Exceptions\UnauthorizedException;
 use Illuminate\Http\Request;
@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Http;
 
 class AuthService
 {
-    public function checkPermission(Request $request, string $privilege, string $module){
+    public static function checkPermission(Request $request, string $privilege, string $module){
         if(!$request->headers->has('Authorization')){
             return false;
         }
@@ -26,7 +26,7 @@ class AuthService
 
         return false;
     }
-    public function getAuthUser(Request $request){
+    public static function getAuthUser(Request $request){
         if(!$request->headers->has('Authorization')){
             throw new UnauthorizedException("Unauthorized");
         }

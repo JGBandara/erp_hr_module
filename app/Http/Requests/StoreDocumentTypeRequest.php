@@ -7,14 +7,14 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class StoreEducationQualificationRequest extends FormRequest
+class StoreDocumentTypeRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return AuthService::checkPermission(request(),'add','human-resource/master-data/education-qualifications/manage');
+        return AuthService::checkPermission(request(),'add','human-resource/master-data/document-type/add-new');
     }
 
     /**
@@ -25,9 +25,9 @@ class StoreEducationQualificationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
-            'remark' => 'nullable|string',
-            'active' => 'boolean',
+            'type'=>'required|string',
+            'remark'=>'string',
+            'active'=>'boolean',
         ];
     }
     protected function failedValidation(Validator $validator)

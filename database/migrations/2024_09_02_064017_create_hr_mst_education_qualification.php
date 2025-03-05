@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::create('hr_mst_education_qualification', function (Blueprint $table) {
             $table->id();
-            $table->string('qua_name');
-            $table->string('qua_remark');
-            $table->string('qua_status')->default(1);
-            $table->integer('qua_is_deleted')->default(0);
-            $table->integer('qua_modified_by')->nullable();
-            $table->integer('qua_deleted_by')->nullable();
+            $table->string('name');
+            $table->string('remark');
+            $table->boolean('active')->default(true);
+            $table->integer('created_by');
+            $table->boolean('is_deleted')->default(false);
+            $table->integer('deleted_by')->nullable();
             $table->timestamps();
         });
     }

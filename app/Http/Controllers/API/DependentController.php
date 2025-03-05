@@ -4,22 +4,20 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DependentStoreRequest;
-use App\Services\AuthService;
 use App\Services\DependantService;
+use App\Services\Util\AuthService;
 use App\Traits\ApiResponse;
 
 class DependentController extends Controller
 {
     use ApiResponse;
     private DependantService $dependantService;
-    private AuthService $authService;
-    public function __construct(DependantService $dependantService, AuthService $authService)
+    public function __construct(DependantService $dependantService)
     {
         $this->dependantService = $dependantService;
-        $this->authService = $authService;
     }
     public function store(DependentStoreRequest $request){
-        if($this->authService->checkPermission($request,'add','human-resource/employee/dependents/add-new')){
+        if(AuthService::checkPermission($request,'add','human-resource/employee/dependents/add-new')){
             $validatedData = $request->validated();
             return $this->successResponse($this->dependantService->store($validatedData));
         }

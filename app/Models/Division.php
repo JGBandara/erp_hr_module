@@ -9,5 +9,15 @@ class Division extends Model
 {
     use HasFactory;
     protected $table = 'hr_mst_division';
-    protected $fillable = ['div_code', 'div_name','div_dep_id', 'div_head', 'div_remark', 'div_status'];
+    protected $fillable = [
+        'code',
+        'name',
+        'department_id',
+        'head_of_department_id',
+        'remark',
+        'active',
+        'created_by',
+        'is_deleted',
+        'deletedBy',
+    ];
 }

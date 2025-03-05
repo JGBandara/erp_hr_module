@@ -5,52 +5,54 @@ namespace App\Services;
 use App\Exceptions\CRUDException;
 use App\Exceptions\DepartmentNotFoundException;
 use App\Models\Department;
+use App\Services\abstract\CrudService;
+use App\Services\Interfaces\Service;
+use Illuminate\Database\Eloquent\Model;
 
-class DepartmentService
+class DepartmentService extends CrudService
 {
-
-    public function store(array $validatedData){
-        $data = [
-            'dep_code' => $validatedData['department_code'],
-            'dep_name' => $validatedData['department_name'],
-            'dep_remark' => $validatedData['remark'] ?? null,
-            'dep_status' => $validatedData['active'],
-        ];
-        $department = Department::create($data);
-
-        return $department;
-    }
-    public function update(int $id, array $validatedData){
-        $department = Department::find($id);
-        if (!$department) {
-            throw new DepartmentNotFoundException("Department not found");
-        }
-
-        $department->dep_code = $validatedData['department_code'];
-        $department->dep_name = $validatedData['department_name'];
-        $department->dep_remark = $validatedData['remark'] ?? null;
-        $department->dep_status = $validatedData['active'] ? 1 : 0; // Convert boolean to integer (1 or 0)
-
-        try {
-            $department->save();
-            return $department;
-        } catch (\Exception $e) {
-//            Log::error('Error updating department', ['error' => $e->getMessage()]);
-            throw new CRUDException("Update not successful");
-        }
-
-    }
-    public function getAll(){
-        return Department::where('dep_is_deleted', 0)->select('id','dep_code', 'dep_name', 'dep_remark', 'dep_status')->get();
+    public function __construct(Department $model)
+    {
+        parent::__construct($model);
     }
 
-    public function delete($id){
-        $department = Department::find($id);
-        if (!$department) {
-            throw new DepartmentNotFoundException("Department not found");
-        }
-        $department->dep_is_deleted = 1;
-        $department->save();
-    }
-
+//    public function store(array $data):array{
+//       return Department::create($data)->toArray();
+//    }
+//    public function update(array $data){
+//        $department = Department::find($data['id']);
+//        if (!$department) {
+//            throw new DepartmentNotFoundException("Department not found");
+//        }
+//
+//        try {
+//            $department->update($data);
+//            return $department;
+//        } catch (\Exception $e) {
+//            throw new CRUDException("Update not successful");
+//        }
+//
+//    }
+//    public function getAll(){
+//        return Department::where('is_deleted', 0)->select('id','code', 'name', 'remark','active')->get();
+//    }
+//
+//    public function getById($id)
+//    {
+//        return Department::select([
+//            'id',
+//            'name',
+//            'code',
+//            'remark',
+//            'active'
+//        ])->where(['is_deleted'=>false, 'id'=>$id])->first();
+//    }
+//    public function delete($id, $actionBy){
+//        $department = $this->getById($id);
+//        if (!$department) {
+//            throw new DepartmentNotFoundException("Department not found");
+//        }
+//        $department['is_deleted'] = true;
+//        $this->update($department);
+//    }
 }

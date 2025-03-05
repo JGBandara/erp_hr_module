@@ -7,8 +7,8 @@ use App\Exceptions\IllegalArgumentException;
 use App\Exceptions\UnauthorizedException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreLeaveRequest;
-use App\Services\AuthService;
 use App\Services\LeaveRequestService;
+use App\Services\Util\AuthService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 
@@ -16,15 +16,13 @@ class LeaveRequestController extends Controller
 {
     use ApiResponse;
     private LeaveRequestService $leaveRequestService;
-    private AuthService $authService;
-    public function __construct(LeaveRequestService $leaveRequestService, AuthService $authService)
+    public function __construct(LeaveRequestService $leaveRequestService)
     {
         $this->leaveRequestService = $leaveRequestService;
-        $this->authService = $authService;
     }
     public function store(StoreLeaveRequest $request){
         try {
-            $data = $this->authService->getAuthUser($request);
+            $data = AuthService::getAuthUser($request);
             $validatedData = $request->validated();
             $validatedData['created_by'] = $data['id'];
             $validatedData['covering_officer_id'] = $validatedData['covering_officer_id'] ?? 0;

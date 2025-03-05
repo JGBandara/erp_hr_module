@@ -4,81 +4,54 @@ namespace App\Services;
 
 use App\Exceptions\CRUDException;
 use App\Models\educationQualification;
+use App\Services\Interfaces\Service;
 use Illuminate\Support\Facades\Http;
 
-class EducationQualificationService
+class EducationQualificationService implements Service
 {
-    private function createArray(array $arr): array
+    public function store(array $data): array
     {
-        $data = [];
-
-
-        if (array_key_exists('qua_name', $arr)) {
-            $data['qua_name'] = $arr['qua_name'];
-        }
-
-        if (array_key_exists('qua_remark', $arr)) {
-            $data['qua_remark'] = $arr['qua_remark'];
-        }
-
-        if (array_key_exists('qua_status', $arr)) {
-            $data['qua_status'] = $arr['qua_status'];
-        }
-
-        return $data;
+        return EducationQualification::create($data)->toArray();
     }
-    public function store(array $arr): educationQualification{
-        return educationQualification::create($this->createArray($arr));
-    }
+    public function update(array $data)
+    {
+        $educationQualification = EducationQualification::find($data['id']);
 
-    public function getAll(){
-         $details = educationQualification::where('qua_is_deleted',0)->get();
-         $arr = array();
-         foreach ($details as $type){
-             array_push($arr, ['id'=>$type->id, 'qua_name'=>$type->qua_name, 'qua_status'=>$type->qua_status]);
-         }
-         return $arr;
-    }
-
-    public function getAllDetails(int $id){
-        return educationQualification::find($id);
-    }
-
-    public function update(array $arr, int $id, int $modifiedBy){
-        $educationQualification = educationQualification::find($id);
-
-        if(!$educationQualification){
+        if (!$educationQualification) {
             throw new CRUDException("Education Qualification not found");
         }
 
-
-        if (array_key_exists('qua_name', $arr)) {
-            $educationQualification->qua_name = $arr['qua_name'];
-        }
-
-        if (array_key_exists('qua_remark', $arr)) {
-            $educationQualification->qua_remark = $arr['qua_remark'];
-        }
-
-        if (array_key_exists('qua_status', $arr)) {
-            $educationQualification->qua_status = $arr['qua_status'];
-        }
-
-        $educationQualification->qua_modified_by = $modifiedBy;
-
-        $educationQualification->save();
-
+        $educationQualification->update($data);
     }
 
-    public function delete($id, $userId){
-        $educationQualification = EducationQualification::find($id);
+    public function getAll()
+    {
+        return EducationQualification::select([
+            'id',
+            'name',
+            'remark',
+            'active',
+        ])->where('is_deleted', false)->get();
+    }
+
+    public function getById($id)
+    {
+        return EducationQualification::select([
+            'id',
+            'name',
+            'remark',
+            'active',
+        ])->where(['is_deleted' => false, 'id' => $id])->first();
+    }
+
+    public function delete($id, $actionBy)
+    {
+        $educationQualification = $this->getById($id)->toArray();
         if (!$educationQualification) {
             throw new CRUDException('Qualification not found');
         }
-        $educationQualification->qua_deleted_by = $userId;
-        $educationQualification->qua_is_deleted = 1;
-        $educationQualification->save();
+        $educationQualification['deleted_by'] = $actionBy;
+        $educationQualification['is_deleted'] = true;
+        $this->update($educationQualification);
     }
-
-
 }

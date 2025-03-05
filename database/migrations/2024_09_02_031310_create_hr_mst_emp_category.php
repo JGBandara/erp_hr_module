@@ -13,12 +13,15 @@ return new class extends Migration
     {
         Schema::create('hr_mst_emp_category', function (Blueprint $table) {
             $table->id();
-            $table->string('emp_code')->unique();
-            $table->string('emp_name');
-            $table->string('emp_level');
-            $table->integer('emp_rank');
-            $table->string('emp_remark');
-            $table->integer('emp_status');
+            $table->string('code')->unique();
+            $table->string('name');
+            $table->string('level');
+            $table->integer('rank');
+            $table->string('remark');
+            $table->boolean('active')->default(true);
+            $table->integer('created_by');
+            $table->boolean('is_deleted')->default(false);
+            $table->integer('deleted_by')->default(0);
             $table->timestamps();
         });
     }
